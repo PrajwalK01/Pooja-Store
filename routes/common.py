@@ -21,5 +21,8 @@ def site_config():
     config["services"] = db.list_services()
     config.setdefault("stylists", [])
     config.setdefault("hours", {})
+    config.setdefault("max_per_slot", 1)
+    config.setdefault("lunch_start", None)
+    config.setdefault("lunch_end", None)
     config["year"] = datetime.now().year
     return config

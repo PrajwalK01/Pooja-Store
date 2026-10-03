@@ -221,6 +221,10 @@ def _slot_ok(date_str, time_str, stylist_id):
     settings = get_public_settings()
     stylists = settings.get("stylists", [])
     hours = settings.get("hours", {})
+    lunch_start = settings.get("lunch_start")   # e.g. 13 (1 PM)
+    lunch_end   = settings.get("lunch_end")     # e.g. 14 (2 PM)
+    max_per_slot = int(settings.get("max_per_slot", 1))
+
     if stylist_id not in {s["id"] for s in stylists}:
         return False, "Unknown stylist."
     try:
@@ -235,6 +239,10 @@ def _slot_ok(date_str, time_str, stylist_id):
     h = dt.hour + dt.minute / 60
     if not (today_hours[0] <= h < today_hours[1]):
         return False, "Outside business hours."
+    # Check lunch break
+    if lunch_start is not None and lunch_end is not None:
+        if lunch_start <= h < lunch_end:
+            return False, "We are on lunch break at that time."
     return True, None
 
 
@@ -242,23 +250,39 @@ def create_booking(data):
     ok, err = _slot_ok(data["date"], data["time"], data["stylist_id"])
     if not ok:
         return None, err
+    settings = get_public_settings()
+    max_per_slot = int(settings.get("max_per_slot", 1))
     with _lock:
-        clash = list(
+        # Check capacity across ALL stylists for this slot
+        existing = list(
             _col("bookings")
             .where("date", "==", data["date"])
             .where("time", "==", data["time"])
-            .where("stylist_id", "==", data["stylist_id"])
             .where("status", "in", ["pending", "confirmed"])
             .stream()
         )
-        if clash:
-            return None, "That slot was just taken -- please pick another time."
+        if len(existing) >= max_per_slot:
+            return None, "This time slot is fully booked. Please pick another time."
         bid = _col("bookings").document().id
         _col("bookings").document(bid).set({
             **data, "id": bid, "status": "pending",
             "created": datetime.now().isoformat(),
         })
     return bid, None
+
+
+def get_booking(bid):
+    snap = _col("bookings").document(bid).get()
+    return snap.to_dict() if snap.exists else None
+
+
+def _clean_phone(phone):
+    """Strip non-digits and ensure it has a country code."""
+    import re
+    digits = re.sub(r"\D", "", str(phone))
+    if len(digits) == 10:
+        digits = "91" + digits   # assume India
+    return digits if len(digits) >= 10 else ""
 
 
 def list_bookings():
@@ -278,14 +302,34 @@ def delete_booking(bid):
 
 
 def taken_slots(date_str, stylist_id):
+    """Return list of HH:MM times that are fully booked for the given date."""
+    settings = get_public_settings()
+    max_per_slot = int(settings.get("max_per_slot", 1))
+    lunch_start = settings.get("lunch_start")
+    lunch_end   = settings.get("lunch_end")
+
     snap = (
         _col("bookings")
         .where("date", "==", date_str)
-        .where("stylist_id", "==", stylist_id)
         .where("status", "in", ["pending", "confirmed"])
         .stream()
     )
-    return [d.to_dict()["time"] for d in snap]
+    # Count bookings per slot
+    counts = {}
+    for d in snap:
+        t = d.to_dict().get("time", "")
+        counts[t] = counts.get(t, 0) + 1
+
+    # Slots at or over capacity are "taken"
+    full = [t for t, c in counts.items() if c >= max_per_slot]
+
+    # Add lunch break slots
+    if lunch_start is not None and lunch_end is not None:
+        for h in range(int(lunch_start), int(lunch_end)):
+            for m in [0, 30]:
+                full.append(f"{str(h).zfill(2)}:{str(m).zfill(2)}")
+
+    return full
 
 
 def add_review(data):

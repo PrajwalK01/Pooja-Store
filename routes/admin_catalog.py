@@ -35,6 +35,28 @@ def settings_payload(data):
     currency = str(data.get("currency", "")).strip()[:8]
     stylists_data = data.get("stylists")
     hours_data = data.get("hours")
+
+    # Capacity and lunch break
+    try:
+        max_per_slot = int(data.get("max_per_slot", 1))
+        if not 1 <= max_per_slot <= 50:
+            return None, "Max bookings per slot must be between 1 and 50."
+    except (TypeError, ValueError):
+        return None, "Max bookings per slot must be a number."
+
+    lunch_start = data.get("lunch_start")
+    lunch_end   = data.get("lunch_end")
+    if lunch_start is not None and lunch_end is not None:
+        try:
+            lunch_start = int(lunch_start)
+            lunch_end   = int(lunch_end)
+            if not (0 <= lunch_start < lunch_end <= 24):
+                return None, "Lunch break end must be after start."
+        except (TypeError, ValueError):
+            return None, "Lunch break times must be valid hours."
+    else:
+        lunch_start = None
+        lunch_end   = None
     if not salon or not currency:
         return None, "Salon name and currency symbol are required."
     if whatsapp and not 8 <= len(whatsapp) <= 15:
@@ -81,6 +103,9 @@ def settings_payload(data):
         "currency": currency,
         "stylists": stylists,
         "hours": hours,
+        "max_per_slot": max_per_slot,
+        "lunch_start": lunch_start,
+        "lunch_end": lunch_end,
     }, None
 
 

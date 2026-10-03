@@ -124,20 +124,28 @@ async function loadSlots() {
   const day = (new Date(wiz.date + "T12:00:00").getDay() + 6) % 7;
   const hrs = CFG.hours[String(day)];
   if (!hrs) { box.innerHTML = `<p style="color:var(--pink)">Closed that day.</p>`; return; }
-  box.innerHTML = `<p style="color:var(--muted)">Loading slots...</p>`;
+  const lunchStart = CFG.lunch_start;
+  const lunchEnd = CFG.lunch_end;
+  let lunchNote = "";
+  if (lunchStart && lunchEnd && lunchEnd > lunchStart) {
+    lunchNote = `<p style="color:var(--muted);font-size:.85rem;margin-bottom:8px">Lunch break: ${String(lunchStart).padStart(2,"0")}:00 - ${String(lunchEnd).padStart(2,"0")}:00 (not available)</p>`;
+  }
+  box.innerHTML = `${lunchNote}<p style="color:var(--muted)">Loading slots...</p>`;
   let taken = [];
   try {
     const r = await fetch(`/api/availability?date=${wiz.date}&stylist=${wiz.stylist}`);
     taken = (await r.json()).taken || [];
   } catch { box.innerHTML = `<p style="color:var(--pink)">Could not load slots — check connection.</p>`; return; }
   const now = new Date();
-  let html = "";
+  let html = lunchNote;
   for (let h = hrs[0]; h < hrs[1]; h++) {
     for (const m of [0, 30]) {
       const t = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
       const isPast = wiz.date === todayStr() && (h < now.getHours() || (h === now.getHours() && m <= now.getMinutes()));
-      const dis = taken.includes(t) || isPast;
-      html += `<button class="slot ${wiz.time === t ? "sel" : ""}" data-t="${t}" ${dis ? "disabled" : ""}>${t}</button>`;
+      const isLunch = lunchStart && lunchEnd && h >= lunchStart && h < lunchEnd;
+      const dis = taken.includes(t) || isPast || isLunch;
+      const label = isLunch ? `${t} (Lunch)` : t;
+      html += `<button class="slot ${wiz.time === t ? "sel" : ""}" data-t="${t}" ${dis ? "disabled" : ""}>${label}</button>`;
     }
   }
   box.innerHTML = html || `<p style="color:var(--muted)">No slots that day.</p>`;
@@ -354,6 +362,9 @@ function renderAdminSettings(settings) {
   $("#settings-currency").value = settings.currency || "";
   $("#settings-maps").value = settings.maps_query || "";
   $("#settings-whatsapp").value = settings.whatsapp || "";
+  $("#settings-max-per-slot").value = settings.max_per_slot || 1;
+  $("#settings-lunch-start").value = settings.lunch_start || 0;
+  $("#settings-lunch-end").value = settings.lunch_end || 0;
   $("#stylist-list").innerHTML = (settings.stylists || []).map(stylist => `
     <div class="stylist-editor-row" data-stylist-id="${escapeHTML(stylist.id)}">
       <div class="field"><label>Name</label><input data-stylist-field="name" value="${escapeHTML(stylist.name)}" maxlength="60" required></div>
@@ -437,14 +448,22 @@ async function bindAdmin() {
     await fetch("/api/admin/logout", { method: "POST" });
     window.location.href = "/admin/login";
   });
-  bookingList.addEventListener("click", async event => {
+    bookingList.addEventListener("click", async event => {
     const action = event.target.closest("[data-act]");
     const deletion = event.target.closest("[data-del]");
     if (action) {
-      await adminFetch(`/api/admin/bookings/${action.dataset.id}/status`, {
+      const resp = await adminFetch(`/api/admin/bookings/${action.dataset.id}/status`, {
         method: "PATCH", body: JSON.stringify({ status: action.dataset.act }),
       });
-      toast("Booking updated."); loadAdmin();
+      const result = await resp.json();
+      toast("Booking updated.");
+      // If confirmed and WhatsApp URL available, open it
+      if (action.dataset.act === "confirmed" && result.whatsapp_url) {
+        if (confirm("Send WhatsApp confirmation to customer?")) {
+          window.open(result.whatsapp_url, "_blank");
+        }
+      }
+      loadAdmin();
     } else if (deletion) {
       if (!confirm("Delete this booking permanently?")) return;
       await adminFetch(`/api/admin/bookings/${deletion.dataset.del}`, { method: "DELETE" });
@@ -575,6 +594,9 @@ async function bindAdmin() {
         currency: $("#settings-currency").value,
         maps_query: $("#settings-maps").value,
         whatsapp: $("#settings-whatsapp").value,
+        max_per_slot: Number($("#settings-max-per-slot").value),
+        lunch_start: Number($("#settings-lunch-start").value) || null,
+        lunch_end: Number($("#settings-lunch-end").value) || null,
         stylists,
         hours,
       }),

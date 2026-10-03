@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#f3f1e8">
-<title>{{ cfg.salon }} — Admin</title>
+<title>{{ cfg.salon }} -- Admin</title>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <script>window.CFG = {{ cfg|tojson }};</script>
 </head>
@@ -15,13 +15,12 @@
     <a href="/">Home</a><a href="/services">Services</a><a href="/gallery">Gallery</a>
     <a href="/booking">Book</a><a href="/reviews">Reviews</a>
   </div>
-  <a class="admin-account-link" href="/admin/signup">Add admin</a>
   <button class="nav-cta" id="logout-btn">Log out</button>
 </nav>
 
 <div class="admin-wrap">
   <h1 class="chrome">Salon dashboard</h1>
-  <p style="color:var(--muted);margin-top:6px"><span class="mode-chip" id="mode-chip">…</span></p>
+  <p style="color:var(--muted);margin-top:6px"><span class="mode-chip" id="mode-chip">...</span></p>
   <div class="admin-tabs" role="tablist" aria-label="Admin sections">
     <button class="active" role="tab" aria-selected="true" data-admin-tab="bookings-panel">Bookings</button>
     <button role="tab" aria-selected="false" data-admin-tab="services-panel">Services</button>
@@ -60,7 +59,7 @@
         <div class="field"><label for="gallery-stylist">Stylist (optional)</label><input id="gallery-stylist" name="stylist" maxlength="60"></div>
       </div>
       <button class="btn btn-pink">Add photo</button>
-      <p class="admin-help">JPG, PNG, or WebP · maximum 8 MB</p>
+      <p class="admin-help">JPG, PNG, or WebP - maximum 8 MB</p>
     </form>
     <div id="admin-gallery-list" class="managed-gallery"></div>
   </section>
@@ -72,6 +71,22 @@
       <div class="field"><label for="settings-currency">Price currency symbol</label><input id="settings-currency" maxlength="8" required></div>
       <div class="field"><label for="settings-maps">Full address or Maps search (optional)</label><input id="settings-maps" maxlength="180"></div>
       <div class="field"><label for="settings-whatsapp">WhatsApp number, with country code</label><input id="settings-whatsapp" inputmode="numeric" placeholder="Digits only, or leave blank" maxlength="15"></div>
+
+      <div class="settings-group">
+        <h3>Booking capacity</h3>
+        <div class="admin-editor-row">
+          <div class="field"><label for="settings-max-per-slot">Max bookings per 30-min slot</label><input id="settings-max-per-slot" type="number" min="1" max="50" value="1" required></div>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <h3>Lunch break</h3>
+        <p class="admin-help">Customers cannot book during this time. Leave both at 0 to disable.</p>
+        <div class="admin-editor-row">
+          <div class="field"><label for="settings-lunch-start">Lunch start (hour, 24h)</label><input id="settings-lunch-start" type="number" min="0" max="23" value="0"></div>
+          <div class="field"><label for="settings-lunch-end">Lunch end (hour, 24h)</label><input id="settings-lunch-end" type="number" min="0" max="24" value="0"></div>
+        </div>
+      </div>
 
       <div class="settings-group">
         <div class="settings-group-heading"><h3>Stylists</h3><button class="mini-btn" id="stylist-add" type="button">Add stylist</button></div>
