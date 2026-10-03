@@ -9,10 +9,18 @@ from routes import register_routes
 
 def create_app():
     application = Flask(__name__)
-    application.secret_key = os.getenv("FLASK_SECRET_KEY") or os.urandom(32)
+
+    secret = os.getenv("FLASK_SECRET_KEY", "").strip()
+    if not secret:
+        raise RuntimeError("FLASK_SECRET_KEY environment variable is not set.")
+    application.secret_key = secret
+
     application.config.update(
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
+        SESSION_COOKIE_SECURE=True,      # required on Vercel (HTTPS only)
+        SESSION_COOKIE_NAME="7star_session",
+        PERMANENT_SESSION_LIFETIME=86400, # 24 hours
         MAX_CONTENT_LENGTH=8 * 1024 * 1024,
     )
 

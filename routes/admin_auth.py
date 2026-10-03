@@ -17,6 +17,7 @@ def admin_login():
     password = str(data.get("password", ""))
     account = db.get_admin(username) if username else None
     if account and check_password_hash(account["password_hash"], password):
+        session.permanent = True
         session["admin"] = True
         session["admin_username"] = username
         return jsonify({"ok": True})
