@@ -81,10 +81,10 @@
 
       <div class="settings-group">
         <h3>Lunch break</h3>
-        <p class="admin-help">Customers cannot book during this time. Leave both at 0 to disable.</p>
+        <p class="admin-help">Customers cannot book during this time. Enter hour in 24h (e.g. 13 = 1 PM). Set both to 0 to disable.</p>
         <div class="admin-editor-row">
-          <div class="field"><label for="settings-lunch-start">Lunch start (hour, 24h)</label><input id="settings-lunch-start" type="number" min="0" max="23" value="0"></div>
-          <div class="field"><label for="settings-lunch-end">Lunch end (hour, 24h)</label><input id="settings-lunch-end" type="number" min="0" max="24" value="0"></div>
+          <div class="field"><label for="settings-lunch-start">Lunch start hour (0-23)</label><input id="settings-lunch-start" type="number" min="0" max="23" value="0"><span class="admin-help" id="lunch-start-hint"></span></div>
+          <div class="field"><label for="settings-lunch-end">Lunch end hour (0-24)</label><input id="settings-lunch-end" type="number" min="0" max="24" value="0"><span class="admin-help" id="lunch-end-hint"></span></div>
         </div>
       </div>
 
@@ -103,6 +103,6 @@
 </div>
 
 <div id="toast"></div>
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}?v=5"></script>
 </body>
 </html>

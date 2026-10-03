@@ -108,6 +108,15 @@ function renderStep1() {
     </button>`).join("");
 }
 
+function to12hr(t) {
+  const [hStr, mStr] = t.split(":");
+  let h = parseInt(hStr);
+  const ampm = h >= 12 ? "PM" : "AM";
+  if (h === 0) h = 12;
+  else if (h > 12) h -= 12;
+  return `${h}:${mStr} ${ampm}`;
+}
+
 function todayStr(offset = 0) {
   const d = new Date(); d.setDate(d.getDate() + offset);
   return d.toISOString().slice(0, 10);
@@ -128,7 +137,7 @@ async function loadSlots() {
   const lunchEnd = CFG.lunch_end;
   let lunchNote = "";
   if (lunchStart && lunchEnd && lunchEnd > lunchStart) {
-    lunchNote = `<p style="color:var(--muted);font-size:.85rem;margin-bottom:8px">Lunch break: ${String(lunchStart).padStart(2,"0")}:00 - ${String(lunchEnd).padStart(2,"0")}:00 (not available)</p>`;
+    lunchNote = `<p style="color:var(--muted);font-size:.85rem;margin-bottom:8px">Lunch break: ${to12hr(String(lunchStart).padStart(2,"0")+":00")} - ${to12hr(String(lunchEnd).padStart(2,"0")+":00")} (not available)</p>`;
   }
   box.innerHTML = `${lunchNote}<p style="color:var(--muted)">Loading slots...</p>`;
   let taken = [];
@@ -144,7 +153,7 @@ async function loadSlots() {
       const isPast = wiz.date === todayStr() && (h < now.getHours() || (h === now.getHours() && m <= now.getMinutes()));
       const isLunch = lunchStart && lunchEnd && h >= lunchStart && h < lunchEnd;
       const dis = taken.includes(t) || isPast || isLunch;
-      const label = isLunch ? `${t} (Lunch)` : t;
+      const label = isLunch ? `${to12hr(t)} (Lunch)` : to12hr(t);
       html += `<button class="slot ${wiz.time === t ? "sel" : ""}" data-t="${t}" ${dis ? "disabled" : ""}>${label}</button>`;
     }
   }
@@ -157,7 +166,7 @@ function renderSummary() {
   const displayDate = `${d}/${m}/${y}`;
   $("#summary").innerHTML =
     `<b>${escapeHTML(s.icon)} ${escapeHTML(s.name)}</b> — ${money(s.price)} (${s.mins} min)<br>` +
-    `Date: <b>${displayDate}</b> at <b>${wiz.time}</b>`;
+    `Date: <b>${displayDate}</b> at <b>${to12hr(wiz.time)}</b>`;
 }
 
 function wizValidate() {
@@ -198,11 +207,13 @@ function bindWizard() {
   const w = $("#wizard");
   if (!w) return;
   autoSetStylist();
+
+  // Pre-select service from URL param — stay on step 1 so user sees it highlighted
   const requestedService = new URLSearchParams(window.location.search).get("service");
-  if (CFG.services.some(service => service.id === requestedService)) {
+  if (requestedService && CFG.services.some(s => s.id === requestedService)) {
     wiz.service = requestedService;
-    wiz.step = 2;
   }
+
   renderStep1();
 
   // Custom DD/MM/YYYY date input
@@ -364,21 +375,29 @@ async function loadAdmin() {
   const svcName = id => (adminServiceCatalog.find(s => s.id === id) || {}).name || id;
   const styName = id => (CFG.stylists.find(s => s.id === id) || {}).name || id;
   const fmtDate = iso => { if (!iso) return ""; const [y,m,d] = iso.split("-"); return `${d}/${m}/${y}`; };
-  $("#bk-list").innerHTML = bookings.length ? [...bookings].reverse().map(b => `
+  const fmtTime = t => { if (!t) return ""; const [hStr,mStr] = t.split(":"); let h=parseInt(hStr); const ap=h>=12?"PM":"AM"; if(h===0)h=12; else if(h>12)h-=12; return `${h}:${mStr} ${ap}`; };
+  $("#bk-list").innerHTML = bookings.length ? [...bookings].reverse().map(b => {
+    const isPending   = b.status === "pending";
+    const isConfirmed = b.status === "confirmed";
+    const isDone      = b.status === "done";
+    const isCancelled = b.status === "cancelled";
+    const confirmBtn  = isPending   ? `<button data-act="confirmed" data-id="${b.id}">Confirm</button>` : "";
+    const doneBtn     = isConfirmed ? `<button data-act="done" data-id="${b.id}">Done</button>` : "";
+    const cancelBtn   = (!isDone && !isCancelled) ? `<button data-act="cancelled" data-id="${b.id}">Cancel</button>` : "";
+    return `
     <div class="bk-row s-${b.status}">
       <div class="top">
         <b>${(b.name || "").replace(/[<>&]/g, "")}</b>
         <span class="st ${b.status}">${b.status}</span>
       </div>
-      <small>${svcName(b.service_id)} · ${fmtDate(b.date)} ${b.time}</small>
+      <small>${svcName(b.service_id)} · ${fmtDate(b.date)} ${fmtTime(b.time)}</small>
       <small>Ph: ${(b.phone || "").replace(/[<>&]/g, "")}${b.notes ? " · Note: " + b.notes.replace(/[<>&]/g, "") : ""}</small>
       <div class="bk-actions">
-        <button data-act="confirmed" data-id="${b.id}">Confirm</button>
-        <button data-act="done" data-id="${b.id}">Done</button>
-        <button data-act="cancelled" data-id="${b.id}">Cancel</button>
+        ${confirmBtn}${doneBtn}${cancelBtn}
         <button class="danger" data-del="${b.id}">Delete</button>
       </div>
-    </div>`).join("") : `<p style="color:var(--muted);text-align:center">No bookings yet. Share your website to get started.</p>`;
+    </div>`;
+  }).join("") : `<p style="color:var(--muted);text-align:center">No bookings yet. Share your website to get started.</p>`;
 }
 
 let adminServiceCatalog = [...CFG.services];
@@ -416,8 +435,22 @@ function renderAdminSettings(settings) {
   $("#settings-maps").value = settings.maps_query || "";
   $("#settings-whatsapp").value = settings.whatsapp || "";
   $("#settings-max-per-slot").value = settings.max_per_slot || 1;
-  $("#settings-lunch-start").value = settings.lunch_start || 0;
-  $("#settings-lunch-end").value = settings.lunch_end || 0;
+  const lunchStartVal = settings.lunch_start || 0;
+  const lunchEndVal = settings.lunch_end || 0;
+  $("#settings-lunch-start").value = lunchStartVal;
+  $("#settings-lunch-end").value = lunchEndVal;
+  // Show AM/PM hints for lunch
+  const updateLunchHints = () => {
+    const s = Number($("#settings-lunch-start").value);
+    const e = Number($("#settings-lunch-end").value);
+    const sh = $("#lunch-start-hint");
+    const eh = $("#lunch-end-hint");
+    if (sh) sh.textContent = s > 0 ? (s >= 12 ? `${s > 12 ? s-12 : s} PM` : `${s} AM`) : "";
+    if (eh) eh.textContent = e > 0 ? (e >= 12 ? `${e > 12 ? e-12 : e} PM` : `${e} AM`) : "";
+  };
+  updateLunchHints();
+  $("#settings-lunch-start").addEventListener("input", updateLunchHints);
+  $("#settings-lunch-end").addEventListener("input", updateLunchHints);
   $("#stylist-list").innerHTML = (settings.stylists || []).map(stylist => `
     <div class="stylist-editor-row" data-stylist-id="${escapeHTML(stylist.id)}">
       <div class="field"><label>Name</label><input data-stylist-field="name" value="${escapeHTML(stylist.name)}" maxlength="60" required></div>
@@ -430,17 +463,30 @@ function renderAdminSettings(settings) {
     const closed = !hours;
     const open = hours ? hours[0] : 9;
     const close = hours ? hours[1] : 17;
+    const openAmPm = open >= 12 ? "PM" : "AM";
+    const closeAmPm = close >= 12 ? "PM" : "AM";
     return `<div class="hours-editor-row" data-hours-day="${index}">
       <b>${day}</b>
-      <label class="hour-field">Open<input data-hours-open type="number" min="0" max="23" value="${open}" aria-label="${day} opening hour" ${closed ? "disabled" : ""}></label>
+      <label class="hour-field">Open<input data-hours-open type="number" min="0" max="23" value="${open}" aria-label="${day} opening hour" ${closed ? "disabled" : ""}><span class="ampm-hint">${closed ? "" : openAmPm}</span></label>
       <label class="closed-toggle"><input data-hours-closed type="checkbox" ${closed ? "checked" : ""}> Closed</label>
-      <label class="hour-field">Close<input data-hours-close type="number" min="1" max="24" value="${close}" aria-label="${day} closing hour" ${closed ? "disabled" : ""}></label>
+      <label class="hour-field">Close<input data-hours-close type="number" min="1" max="24" value="${close}" aria-label="${day} closing hour" ${closed ? "disabled" : ""}><span class="ampm-hint">${closed ? "" : closeAmPm}</span></label>
     </div>`;
   }).join("");
   $$("[data-hours-closed]").forEach(toggle => toggle.addEventListener("change", () => {
     const row = toggle.closest("[data-hours-day]");
-    row.querySelectorAll("[data-hours-open], [data-hours-close]").forEach(input => { input.disabled = toggle.checked; });
+    row.querySelectorAll("[data-hours-open], [data-hours-close]").forEach(input => {
+      input.disabled = toggle.checked;
+      const hint = input.nextElementSibling;
+      if (hint) hint.textContent = toggle.checked ? "" : (Number(input.value) >= 12 ? "PM" : "AM");
+    });
   }));
+  // Live AM/PM update as user types
+  $$("[data-hours-open], [data-hours-close]").forEach(input => {
+    input.addEventListener("input", () => {
+      const hint = input.nextElementSibling;
+      if (hint) hint.textContent = Number(input.value) >= 12 ? "PM" : "AM";
+    });
+  });
 }
 
 async function loadAdminSettings() {
@@ -581,10 +627,11 @@ async function bindAdmin() {
 
   $("#gallery-form").addEventListener("submit", async event => {
     event.preventDefault();
-    const response = await fetch("/api/admin/gallery", { method: "POST", body: new FormData(event.currentTarget) });
+    const form = event.currentTarget;
+    const response = await fetch("/api/admin/gallery", { method: "POST", body: new FormData(form) });
     const result = await response.json();
     if (!response.ok) return toast(result.error || "Photo could not be uploaded.", true);
-    event.currentTarget.reset();
+    form.reset();
     await loadAdminGallery();
     toast("Photo added to the gallery.");
   });
