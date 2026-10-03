@@ -55,16 +55,7 @@
       <button class="btn btn-pink" style="width:100%;margin-top:6px">Sign In →</button>
     </form>
 
-    {% if can_signup %}
-    <p class="auth-switch">First time here? <a href="/admin/signup">Create admin account</a></p>
-    {% elif first_admin %}
-    <p class="auth-note">
-      First-time setup: add a private <code>ADMIN_SETUP_KEY</code> to <code>.env</code>,
-      then <a href="/admin/signup">continue to signup</a>.
-    </p>
-    {% else %}
-    <p class="auth-note">Admin accounts are created by the store owner.</p>
-    {% endif %}
+
   </div>
 </main>
 
