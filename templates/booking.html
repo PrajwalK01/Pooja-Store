@@ -3,64 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f3f1e8">
-<title>Book an Appointment -- {{ cfg.salon }}</title>
-<meta name="description" content="Book a service at {{ cfg.salon }}.">
+<meta name="theme-color" content="#fdf6e3">
+<title>Place Your Order — {{ cfg.salon }}</title>
+<meta name="description" content="Select pooja items and place your order at {{ cfg.salon }}.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <script>window.CFG = {{ cfg|tojson }};</script>
 </head>
 <body>
+
 <nav>
-  <a class="logo" href="/" aria-label="{{ cfg.salon }} home"><span class="logo-mark">*</span><span class="logo-type">{{ cfg.salon }}<small>HAIR SALON</small></span></a>
+  <a class="logo" href="/" aria-label="{{ cfg.salon }} home">
+    <span class="logo-mark">🪔</span>
+    <span class="logo-type">{{ cfg.salon }}<small>POOJA STORE</small></span>
+  </a>
   <div class="nav-links">
-    <a href="/">Home</a><a href="/services">Services</a><a href="/gallery">Gallery</a>
-    <a href="/booking" aria-current="page">Book</a><a href="/reviews">Reviews</a>
-    <a href="/#location">Location</a><a class="nav-login" href="/admin">Login</a>
+    <a href="/">Home</a>
+    <a href="/services">Products</a>
+    <a href="/booking" aria-current="page" class="active">Order</a>
+    <a href="/reviews">Reviews</a>
+    <a href="/#location">Visit Us</a>
+    <a class="nav-login" href="/admin">Login</a>
   </div>
   <div style="display:flex;gap:10px;align-items:center">
-    <a class="nav-cta" href="#book">Book now</a>
+    <a class="nav-cta" href="#book">Order Now</a>
     <button id="menu-btn" aria-label="Open navigation">Menu</button>
   </div>
 </nav>
+
 <div id="mobile-menu">
   <button id="menu-close" class="close" aria-label="Close navigation">Close</button>
-  <a href="/">Home</a><a href="/services">Services</a><a href="/gallery">Gallery</a>
-  <a href="/booking">Book</a><a href="/reviews">Reviews</a><a href="/#location">Location</a><a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a><a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a><a href="/admin">Login</a>
+  <a href="/">Home</a>
+  <a href="/services">Products</a>
+  <a href="/booking">Order</a>
+  <a href="/reviews">Reviews</a>
+  <a href="/#location">Visit Us</a>
+  <a href="/admin">Login</a>
 </div>
+
 <main class="page-main">
-  <header class="page-heading">
-    <p class="page-kicker">{{ cfg.salon }} - APPOINTMENTS</p>
-    <h1 class="chrome">Book Your Appointment</h1>
-    <p>Choose your service and a time that works for you.</p>
+  <header class="page-heading fade-in">
+    <p class="page-kicker">{{ cfg.salon }} &nbsp;✦&nbsp; ORDER</p>
+    <h1 class="chrome">Place Your Order</h1>
+    <div class="om-divider">✦ ॐ ✦</div>
+    <p>Select your pooja items and choose a pickup date and time.</p>
   </header>
+
   <section id="book" class="booking-page-section">
     <div class="wizard" id="wizard">
       <div class="steps"><i class="on"></i><i></i><i></i></div>
-      <h3 id="wiz-title" style="margin-bottom:14px;color:var(--cyan)">Pick your service</h3>
-      <div class="step on" id="step-1"><div class="opts"></div></div>
+      <h3 id="wiz-title" style="margin-bottom:16px;color:var(--maroon)">Select Your Items</h3>
+
+      <!-- Step 1: Select products (multi-select checklist) -->
+      <div class="step on" id="step-1">
+        <div class="selection-summary" id="selection-summary">
+          <strong>Selected:</strong> <span id="selected-names"></span>
+        </div>
+        <div class="opts" id="step-1-opts"></div>
+      </div>
+
+      <!-- Step 2: Date & time -->
       <div class="step" id="step-2">
         <div class="field">
-          <label for="book-date">Appointment date (DD/MM/YYYY)</label>
+          <label for="book-date-display">Order date (DD/MM/YYYY)</label>
           <input type="text" id="book-date-display" placeholder="DD/MM/YYYY" maxlength="10" autocomplete="off" inputmode="numeric">
           <input type="hidden" id="book-date">
         </div>
-        <div class="field"><label>Available times</label><div class="slots" id="slots"><p style="color:var(--muted)">Choose a date to see available slots.</p></div></div>
+        <div class="field">
+          <label>Available pickup times</label>
+          <div class="slots" id="slots">
+            <p style="color:var(--muted)">Choose a date to see available slots.</p>
+          </div>
+        </div>
       </div>
+
+      <!-- Step 3: Customer details -->
       <div class="step" id="step-3">
         <div id="summary"></div>
-        <div class="field"><label for="f-name">Your name</label><input id="f-name" autocomplete="name" maxlength="60" required></div>
-        <div class="field"><label for="f-phone">Phone / WhatsApp</label><input id="f-phone" type="tel" autocomplete="tel" placeholder="Phone number" maxlength="30" required></div>
-        <div class="field"><label for="f-notes">Notes (optional)</label><textarea id="f-notes" rows="2" maxlength="300"></textarea></div>
+        <div class="field"><label for="f-name">Your Name</label><input id="f-name" autocomplete="name" maxlength="60" required placeholder="Full name"></div>
+        <div class="field"><label for="f-phone">Phone / WhatsApp</label><input id="f-phone" type="tel" autocomplete="tel" placeholder="Your phone number" maxlength="30" required></div>
+        <div class="field"><label for="f-notes">Notes (optional)</label><textarea id="f-notes" rows="2" maxlength="300" placeholder="Any special requests…"></textarea></div>
       </div>
-      <div class="wiz-nav"><button class="btn btn-ghost" id="wiz-back">Back</button><button class="btn btn-pink" id="wiz-next">Next</button></div>
+
+      <div class="wiz-nav">
+        <button class="btn btn-ghost" id="wiz-back">Back</button>
+        <button class="btn btn-pink" id="wiz-next">Next →</button>
+      </div>
     </div>
   </section>
 </main>
+
 <footer>
-  <p class="footer-brand">{{ cfg.salon }} <span>- HAIR SALON</span></p>
-  <p class="page-footer-links"><a href="/">Home</a><a href="/services">Services</a><a href="/gallery">Gallery</a><a href="/reviews">Reviews</a></p>
+  <p class="footer-brand">{{ cfg.salon }} <span>· POOJA STORE</span></p>
+  <p class="page-footer-links">
+    <a href="/">Home</a>
+    <a href="/services">Products</a>
+    <a href="/reviews">Reviews</a>
+  </p>
 </footer>
+
 <div id="toast"></div>
-<script src="{{ url_for('static', filename='js/main.js') }}?v=5?v=4"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}?v=6"></script>
 </body>
 </html>

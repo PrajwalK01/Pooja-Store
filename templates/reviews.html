@@ -3,54 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f3f1e8">
-<title>Client Reviews — {{ cfg.salon }}</title>
-<meta name="description" content="Read and share client reviews for {{ cfg.salon }}.">
+<meta name="theme-color" content="#fdf6e3">
+<title>Customer Reviews — {{ cfg.salon }}</title>
+<meta name="description" content="Read and share reviews for {{ cfg.salon }} — Pooja Store.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <script>window.CFG = {{ cfg|tojson }};</script>
 </head>
 <body>
+
 <nav>
-  <a class="logo" href="/" aria-label="{{ cfg.salon }} home"><span class="logo-mark">*</span><span class="logo-type">{{ cfg.salon }}<small>HAIR SALON</small></span></a>
+  <a class="logo" href="/" aria-label="{{ cfg.salon }} home">
+    <span class="logo-mark">🪔</span>
+    <span class="logo-type">{{ cfg.salon }}<small>POOJA STORE</small></span>
+  </a>
   <div class="nav-links">
-    <a href="/">Home</a><a href="/services">Services</a><a href="/gallery">Gallery</a>
-    <a href="/booking">Book</a><a href="/reviews" aria-current="page">Reviews</a>
-    <a href="/#location">Location</a><a class="nav-login" href="/admin">Login</a>
+    <a href="/">Home</a>
+    <a href="/services">Products</a>
+    <a href="/booking">Order</a>
+    <a href="/reviews" aria-current="page" class="active">Reviews</a>
+    <a href="/#location">Visit Us</a>
+    <a class="nav-login" href="/admin">Login</a>
   </div>
   <div style="display:flex;gap:10px;align-items:center">
-    <a class="nav-cta" href="/booking">Book now</a>
+    <a class="nav-cta" href="/booking">Order Now</a>
     <button id="menu-btn" aria-label="Open navigation">Menu</button>
   </div>
 </nav>
+
 <div id="mobile-menu">
   <button id="menu-close" class="close" aria-label="Close navigation">Close</button>
-  <a href="/">Home</a><a href="/services">Services</a><a href="/gallery">Gallery</a>
-  <a href="/booking">Book</a><a href="/reviews">Reviews</a><a href="/#location">Location</a><a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a><a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a><a href="/admin">Login</a>
+  <a href="/">Home</a>
+  <a href="/services">Products</a>
+  <a href="/booking">Order</a>
+  <a href="/reviews">Reviews</a>
+  <a href="/#location">Visit Us</a>
+  <a href="/admin">Login</a>
 </div>
 
 <main class="page-main">
-  <header class="page-heading">
-    <p class="page-kicker">{{ cfg.salon }} · CLIENTS</p>
-    <h1 class="chrome">Client Reviews</h1>
-    <p>Notes from people who have taken a seat in our salon.</p>
+  <header class="page-heading fade-in">
+    <p class="page-kicker">{{ cfg.salon }} &nbsp;✦&nbsp; CUSTOMERS</p>
+    <h1 class="chrome">Customer Blessings &amp; Reviews</h1>
+    <div class="om-divider">✦ ॐ ✦</div>
+    <p>Words from our devoted customers — may the blessings reach you too.</p>
   </header>
-  <section id="reviews" class="reviews-page-section">
-    <div class="avg-stars" id="avg-stars">- - - - -</div>
+
+  <section id="reviews" class="reviews-page-section fade-in">
+    <div class="avg-stars" id="avg-stars">✦ ✦ ✦ ✦ ✦</div>
     <div class="avg-num" id="avg-num">Loading reviews…</div>
     <form id="rev-form" class="review-form">
       <div class="rate-row" id="rate-row"></div>
-      <div class="field"><label for="rev-name">Your name</label><input id="rev-name" maxlength="40" required></div>
-      <div class="field"><label for="rev-text">Your review</label><textarea id="rev-text" rows="3" maxlength="280" required></textarea></div>
-      <button class="btn btn-pink" style="width:100%">Share review</button>
+      <div class="field"><label for="rev-name">Your Name</label><input id="rev-name" maxlength="40" required placeholder="Enter your name"></div>
+      <div class="field"><label for="rev-text">Your Review</label><textarea id="rev-text" rows="3" maxlength="280" required placeholder="Share your experience…"></textarea></div>
+      <button class="btn btn-pink" style="width:100%">Share Your Blessing 🙏</button>
     </form>
     <div id="reviews-list" class="reviews-list"></div>
   </section>
 </main>
+
 <footer>
-  <p class="footer-brand">{{ cfg.salon }} <span>· HAIR SALON</span></p>
-  <p class="page-footer-links"><a href="/">Home</a><a href="/services">Services</a><a href="/gallery">Gallery</a><a href="/booking">Book</a></p>
+  <p class="footer-brand">{{ cfg.salon }} <span>· POOJA STORE</span></p>
+  <p class="page-footer-links">
+    <a href="/">Home</a>
+    <a href="/services">Products</a>
+    <a href="/booking">Order</a>
+  </p>
 </footer>
+
 <div id="toast"></div>
-<script src="{{ url_for('static', filename='js/main.js') }}?v=5"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}?v=6"></script>
 </body>
 </html>

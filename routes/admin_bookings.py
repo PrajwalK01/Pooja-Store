@@ -10,10 +10,17 @@ admin_bookings_bp = Blueprint("admin_bookings", __name__)
 
 def _whatsapp_confirmation_url(booking, settings):
     """Build a WhatsApp message URL to send to the customer."""
-    salon = settings.get("salon", "7 Star Salon")
+    salon = settings.get("salon", "Gayathri Pooja Store")
     services = db.list_services()
     svc = next((s for s in services if s["id"] == booking.get("service_id")), None)
     svc_name = svc["name"] if svc else booking.get("service_id", "")
+
+    # If multiple items stored in notes, use that
+    notes = booking.get("notes", "")
+    import re as _re
+    match = _re.search(r"\| Items: (.+)", notes)
+    if match:
+        svc_name = match.group(1)
 
     # Format date as DD/MM/YYYY
     raw_date = booking.get("date", "")
@@ -24,14 +31,14 @@ def _whatsapp_confirmation_url(booking, settings):
         display_date = raw_date
 
     msg = (
-        f"Dear {booking.get('name', 'Customer')},\n\n"
-        f"Your booking at {salon} is CONFIRMED!\n\n"
-        f"Booking ID: {booking.get('id', '')}\n"
-        f"Service: {svc_name}\n"
-        f"Date: {display_date}\n"
+        f"Namaste {booking.get('name', 'Customer')} 🙏\n\n"
+        f"Your order at {salon} is CONFIRMED!\n\n"
+        f"Order ID: {booking.get('id', '')}\n"
+        f"Items: {svc_name}\n"
+        f"Pickup Date: {display_date}\n"
         f"Time: {booking.get('time', '')}\n\n"
-        f"Please arrive 5 minutes early.\n"
-        f"Thank you for choosing {salon}!"
+        f"Please visit us at the scheduled time.\n"
+        f"Thank you for choosing {salon}! 🪔"
     )
 
     customer_phone = db._clean_phone(booking.get("phone", ""))

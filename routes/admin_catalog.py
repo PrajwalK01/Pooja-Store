@@ -23,8 +23,10 @@ def service_payload(data):
         return None, "Price and duration must be whole numbers."
     if not name or not description or not icon:
         return None, "Name, description, and icon are required."
-    if not 1 <= price <= 1000000 or not 10 <= minutes <= 600:
-        return None, "Price must be positive and duration must be 10-600 minutes."
+    if not 1 <= price <= 1000000:
+        return None, "Price must be a positive number."
+    # Duration is hidden in the Pooja Store UI; clamp silently to valid range
+    minutes = max(10, min(600, minutes)) if minutes != 0 else 10
     return {"name": name, "desc": description, "icon": icon, "price": price, "mins": minutes}, None
 
 

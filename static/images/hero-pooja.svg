@@ -1,0 +1,285 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 800" width="1400" height="800">
+  <defs>
+    <!-- Deep temple background gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#1a0505"/>
+      <stop offset="40%"  stop-color="#2d0a0a"/>
+      <stop offset="100%" stop-color="#0d0202"/>
+    </linearGradient>
+
+    <!-- Gold gradient for decorations -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#c9922a"/>
+      <stop offset="45%"  stop-color="#f5d98a"/>
+      <stop offset="70%"  stop-color="#e8b84b"/>
+      <stop offset="100%" stop-color="#c9922a"/>
+    </linearGradient>
+
+    <!-- Soft gold for secondary elements -->
+    <linearGradient id="goldSoft" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#f5d98a"/>
+      <stop offset="100%" stop-color="#c9922a"/>
+    </linearGradient>
+
+    <!-- Diya flame gradient -->
+    <radialGradient id="flameGrad" cx="50%" cy="80%" r="60%">
+      <stop offset="0%"   stop-color="#fff9e6" stop-opacity="1"/>
+      <stop offset="25%"  stop-color="#ffe566" stop-opacity="1"/>
+      <stop offset="60%"  stop-color="#ff9a00" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#c0392b" stop-opacity="0.8"/>
+    </radialGradient>
+
+    <!-- Glow filter -->
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <!-- Strong glow for central elements -->
+    <filter id="strongGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <!-- Soft drop shadow -->
+    <filter id="softShadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#c9922a" flood-opacity="0.4"/>
+    </filter>
+
+    <!-- Star pattern -->
+    <pattern id="starPattern" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M40 5 L41.8 38 L75 40 L41.8 42 L40 75 L38.2 42 L5 40 L38.2 38Z"
+            fill="#c9922a" opacity="0.06"/>
+    </pattern>
+
+    <!-- Mandala clip -->
+    <clipPath id="circleClip">
+      <circle cx="900" cy="400" r="320"/>
+    </clipPath>
+  </defs>
+
+  <!-- ═══ BACKGROUND ═══ -->
+  <rect width="1400" height="800" fill="url(#bgGrad)"/>
+  <rect width="1400" height="800" fill="url(#starPattern)"/>
+
+  <!-- Subtle radial glow at center-right -->
+  <radialGradient id="centerGlow" cx="64%" cy="50%" r="40%">
+    <stop offset="0%"  stop-color="#c9922a" stop-opacity="0.12"/>
+    <stop offset="100%" stop-color="#c9922a" stop-opacity="0"/>
+  </radialGradient>
+  <rect width="1400" height="800" fill="url(#centerGlow)"/>
+
+  <!-- ═══ TEMPLE ARCH (right side — main feature) ═══ -->
+  <!-- Outer arch frame -->
+  <path d="M660 760 L660 320 Q660 100 900 100 Q1140 100 1140 320 L1140 760Z"
+        fill="none" stroke="url(#goldGrad)" stroke-width="3" opacity="0.55"/>
+  <!-- Inner arch -->
+  <path d="M690 760 L690 335 Q690 140 900 140 Q1110 140 1110 335 L1110 760Z"
+        fill="none" stroke="url(#goldSoft)" stroke-width="1.5" opacity="0.35"/>
+  <!-- Arch fill (dark interior) -->
+  <path d="M662 760 L662 322 Q662 102 900 102 Q1138 102 1138 322 L1138 760Z"
+        fill="#150404" opacity="0.6"/>
+
+  <!-- ── Arch top ornament ── -->
+  <circle cx="900" cy="100" r="18" fill="url(#goldGrad)" filter="url(#glow)" opacity="0.9"/>
+  <circle cx="900" cy="100" r="10" fill="#fffaf0" opacity="0.7"/>
+  <!-- Arch pillar tops -->
+  <rect x="651" y="300" width="18" height="30" rx="3" fill="url(#goldGrad)" opacity="0.7"/>
+  <rect x="1131" y="300" width="18" height="30" rx="3" fill="url(#goldGrad)" opacity="0.7"/>
+
+  <!-- ── Arch decorative rings ── -->
+  <circle cx="900" cy="400" r="280" fill="none" stroke="url(#goldGrad)" stroke-width="1" opacity="0.2"/>
+  <circle cx="900" cy="400" r="240" fill="none" stroke="url(#goldGrad)" stroke-width="0.8" opacity="0.15"/>
+  <circle cx="900" cy="400" r="200" fill="none" stroke="url(#goldGrad)" stroke-width="0.6" opacity="0.12"/>
+
+  <!-- ═══ MANDALA (background of arch) ═══ -->
+  <!-- Outer petals -->
+  <g transform="translate(900,400)" filter="url(#glow)" opacity="0.18">
+    <g>
+      <ellipse cx="0" cy="-200" rx="18" ry="50" fill="url(#goldGrad)"/>
+      <ellipse cx="0" cy="-200" rx="18" ry="50" fill="url(#goldGrad)" transform="rotate(30)"/>
+      <ellipse cx="0" cy="-200" rx="18" ry="50" fill="url(#goldGrad)" transform="rotate(60)"/>
+      <ellipse cx="0" cy="-200" rx="18" ry="50" fill="url(#goldGrad)" transform="rotate(90)"/>
+      <ellipse cx="0" cy="-200" rx="18" ry="50" fill="url(#goldGrad)" transform="rotate(120)"/>
+      <ellipse cx="0" cy="-200" rx="18" ry="50" fill="url(#goldGrad)" transform="rotate(150)"/>
+      <ellipse cx="0" cy="-200" rx="18" ry="50" fill="url(#goldGrad)" transform="rotate(180)"/>
+      <ellipse cx="0" cy="-200" rx="18" ry="50" fill="url(#goldGrad)" transform="rotate(210)"/>
+      <ellipse cx="0" cy="-200" rx="18" ry="50" fill="url(#goldGrad)" transform="rotate(240)"/>
+      <ellipse cx="0" cy="-200" rx="18" ry="50" fill="url(#goldGrad)" transform="rotate(270)"/>
+      <ellipse cx="0" cy="-200" rx="18" ry="50" fill="url(#goldGrad)" transform="rotate(300)"/>
+      <ellipse cx="0" cy="-200" rx="18" ry="50" fill="url(#goldGrad)" transform="rotate(330)"/>
+    </g>
+    <!-- Inner petals -->
+    <g>
+      <ellipse cx="0" cy="-120" rx="12" ry="34" fill="url(#goldSoft)"/>
+      <ellipse cx="0" cy="-120" rx="12" ry="34" fill="url(#goldSoft)" transform="rotate(45)"/>
+      <ellipse cx="0" cy="-120" rx="12" ry="34" fill="url(#goldSoft)" transform="rotate(90)"/>
+      <ellipse cx="0" cy="-120" rx="12" ry="34" fill="url(#goldSoft)" transform="rotate(135)"/>
+      <ellipse cx="0" cy="-120" rx="12" ry="34" fill="url(#goldSoft)" transform="rotate(180)"/>
+      <ellipse cx="0" cy="-120" rx="12" ry="34" fill="url(#goldSoft)" transform="rotate(225)"/>
+      <ellipse cx="0" cy="-120" rx="12" ry="34" fill="url(#goldSoft)" transform="rotate(270)"/>
+      <ellipse cx="0" cy="-120" rx="12" ry="34" fill="url(#goldSoft)" transform="rotate(315)"/>
+    </g>
+    <circle cx="0" cy="0" r="40" fill="#c9922a" opacity="0.5"/>
+    <circle cx="0" cy="0" r="22" fill="#f5d98a" opacity="0.6"/>
+    <circle cx="0" cy="0" r="10" fill="#fffaf0" opacity="0.8"/>
+  </g>
+
+  <!-- ═══ LARGE DIYA (center of arch) ═══ -->
+  <!-- Glow aura -->
+  <ellipse cx="900" cy="490" rx="130" ry="80" fill="#ff9a00" opacity="0.08" filter="url(#strongGlow)"/>
+  <ellipse cx="900" cy="490" rx="90"  ry="55" fill="#ffe566" opacity="0.10" filter="url(#glow)"/>
+
+  <!-- Diya body -->
+  <ellipse cx="900" cy="580" rx="110" ry="30" fill="url(#goldGrad)" filter="url(#softShadow)"/>
+  <ellipse cx="900" cy="572" rx="100" ry="25" fill="#8b5e1a"/>
+  <!-- Diya bowl -->
+  <path d="M800 560 Q900 620 1000 560 Q990 590 900 600 Q810 590 800 560Z" fill="#c9922a"/>
+  <ellipse cx="900" cy="558" rx="98" ry="22" fill="url(#goldGrad)" opacity="0.9"/>
+  <!-- Diya inner pool (oil) -->
+  <ellipse cx="900" cy="555" rx="60" ry="14" fill="#6b2a00" opacity="0.8"/>
+  <!-- Wick -->
+  <rect x="895" y="510" width="10" height="46" rx="4" fill="#555"/>
+
+  <!-- Flame outer -->
+  <path d="M900 510 C875 480 860 440 880 400 C895 365 905 360 910 340 C920 360 935 375 930 410 C925 445 920 475 900 510Z"
+        fill="url(#flameGrad)" filter="url(#strongGlow)" opacity="0.9"/>
+  <!-- Flame inner highlight -->
+  <path d="M900 505 C887 482 882 455 893 425 C900 405 904 398 907 385 C912 400 918 415 913 438 C908 462 905 482 900 505Z"
+        fill="#fff9e6" opacity="0.6"/>
+
+  <!-- Flame glow ring -->
+  <circle cx="900" cy="420" r="50" fill="#ff9a00" opacity="0.10" filter="url(#strongGlow)"/>
+  <circle cx="900" cy="430" r="30" fill="#ffe566" opacity="0.12" filter="url(#glow)"/>
+
+  <!-- ═══ POOJA THALI (lower left of arch) ═══ -->
+  <ellipse cx="790" cy="640" rx="70" ry="20" fill="url(#goldGrad)" opacity="0.7"/>
+  <ellipse cx="790" cy="636" rx="66" ry="18" fill="#8b5e1a"/>
+  <ellipse cx="790" cy="632" rx="64" ry="16" fill="url(#goldGrad)" opacity="0.85"/>
+  <!-- Items on thali -->
+  <!-- Small diya 1 -->
+  <ellipse cx="760" cy="628" rx="12" ry="6" fill="#c9922a"/>
+  <ellipse cx="760" cy="626" rx="10" ry="5" fill="#f5d98a" opacity="0.8"/>
+  <circle  cx="760" cy="618" r="4" fill="url(#flameGrad)" opacity="0.9"/>
+  <!-- Flower -->
+  <circle cx="800" cy="624" r="8" fill="#e8b84b" opacity="0.7"/>
+  <circle cx="800" cy="624" r="4" fill="#c0392b" opacity="0.8"/>
+  <!-- Incense stick -->
+  <rect x="818" y="610" width="3" height="20" rx="1" fill="#8b5e1a"/>
+  <circle cx="819" cy="608" r="3" fill="#ff9a00" opacity="0.8"/>
+
+  <!-- ═══ KALASH (right of arch base) ═══ -->
+  <ellipse cx="1010" cy="660" rx="40" ry="12" fill="url(#goldGrad)" opacity="0.6"/>
+  <!-- Pot body -->
+  <path d="M975 660 Q970 620 980 590 Q990 570 1010 565 Q1030 570 1040 590 Q1050 620 1045 660Z"
+        fill="url(#goldGrad)" opacity="0.85"/>
+  <!-- Pot neck -->
+  <rect x="998" y="555" width="24" height="14" rx="4" fill="url(#goldSoft)"/>
+  <!-- Coconut top -->
+  <ellipse cx="1010" cy="554" rx="18" ry="8" fill="#5d3a1a"/>
+  <!-- Mango leaves -->
+  <path d="M990 548 Q982 530 994 522 Q1002 530 990 548Z" fill="#2d6e1a" opacity="0.85"/>
+  <path d="M1010 545 Q1005 526 1018 520 Q1024 530 1010 545Z" fill="#2d6e1a" opacity="0.85"/>
+  <path d="M1030 548 Q1026 528 1040 524 Q1044 534 1030 548Z" fill="#2d6e1a" opacity="0.85"/>
+  <!-- Kalash design band -->
+  <path d="M978 620 Q1010 614 1042 620" stroke="#f5d98a" stroke-width="2" fill="none" opacity="0.6"/>
+
+  <!-- ═══ FLOWER PETALS scattered ═══ -->
+  <g opacity="0.5">
+    <ellipse cx="720" cy="500" rx="8" ry="4" fill="#e8b84b" transform="rotate(-20,720,500)"/>
+    <ellipse cx="740" cy="520" rx="6" ry="3" fill="#c0392b" transform="rotate(15,740,520)"/>
+    <ellipse cx="710" cy="540" rx="7" ry="3" fill="#e8b84b" transform="rotate(35,710,540)"/>
+    <ellipse cx="755" cy="490" rx="5" ry="3" fill="#ff9a00" transform="rotate(-10,755,490)"/>
+    <ellipse cx="1060" cy="500" rx="8" ry="4" fill="#e8b84b" transform="rotate(20,1060,500)"/>
+    <ellipse cx="1040" cy="520" rx="6" ry="3" fill="#c0392b" transform="rotate(-15,1040,520)"/>
+    <ellipse cx="1070" cy="540" rx="7" ry="3" fill="#e8b84b" transform="rotate(-35,1070,540)"/>
+  </g>
+
+  <!-- ═══ INCENSE SMOKE (subtle wavy lines) ═══ -->
+  <g opacity="0.18" stroke="#f5d98a" stroke-width="1.5" fill="none">
+    <path d="M860 480 C855 460 865 440 858 420 C851 400 862 380 856 360"/>
+    <path d="M940 475 C945 455 935 435 942 415 C949 395 938 375 944 355"/>
+    <path d="M900 460 C896 438 906 418 899 398"/>
+  </g>
+
+  <!-- ═══ SMALL DECORATIVE DIYAS (flanking) ═══ -->
+  <!-- Left pillar diya -->
+  <g transform="translate(680,480)">
+    <ellipse cx="0" cy="0" rx="22" ry="7" fill="url(#goldGrad)" opacity="0.8"/>
+    <ellipse cx="0" cy="-3" rx="20" ry="6" fill="#8b5e1a"/>
+    <ellipse cx="0" cy="-5" rx="19" ry="5" fill="url(#goldGrad)" opacity="0.9"/>
+    <ellipse cx="0" cy="-7" rx="11" ry="3" fill="#6b2a00"/>
+    <rect x="-2" y="-26" width="5" height="20" rx="2" fill="#555"/>
+    <path d="M0 -26 C-8 -36 -8 -48 -2 -55 C2 -60 4 -60 5 -64 C8 -57 10 -50 7 -42 C5 -35 3 -30 0 -26Z"
+          fill="url(#flameGrad)" filter="url(#glow)" opacity="0.85"/>
+    <ellipse cx="0" cy="-50" rx="14" ry="14" fill="#ff9a00" opacity="0.08" filter="url(#glow)"/>
+  </g>
+  <!-- Right pillar diya -->
+  <g transform="translate(1120,480)">
+    <ellipse cx="0" cy="0" rx="22" ry="7" fill="url(#goldGrad)" opacity="0.8"/>
+    <ellipse cx="0" cy="-3" rx="20" ry="6" fill="#8b5e1a"/>
+    <ellipse cx="0" cy="-5" rx="19" ry="5" fill="url(#goldGrad)" opacity="0.9"/>
+    <ellipse cx="0" cy="-7" rx="11" ry="3" fill="#6b2a00"/>
+    <rect x="-2" y="-26" width="5" height="20" rx="2" fill="#555"/>
+    <path d="M0 -26 C-8 -36 -8 -48 -2 -55 C2 -60 4 -60 5 -64 C8 -57 10 -50 7 -42 C5 -35 3 -30 0 -26Z"
+          fill="url(#flameGrad)" filter="url(#glow)" opacity="0.85"/>
+    <ellipse cx="0" cy="-50" rx="14" ry="14" fill="#ff9a00" opacity="0.08" filter="url(#glow)"/>
+  </g>
+
+  <!-- ═══ TOP ARCH LAMP ═══ -->
+  <g transform="translate(900,130)" filter="url(#glow)">
+    <!-- Hanging chain -->
+    <line x1="0" y1="-30" x2="0" y2="0" stroke="url(#goldGrad)" stroke-width="2"/>
+    <!-- Lamp body -->
+    <path d="M-20 0 Q-22 30 0 38 Q22 30 20 0Z" fill="url(#goldGrad)" opacity="0.9"/>
+    <ellipse cx="0" cy="0" rx="20" ry="7" fill="url(#goldSoft)"/>
+    <!-- Flame -->
+    <path d="M0 0 C-6 -8 -5 -16 0 -20 C5 -16 6 -8 0 0Z" fill="url(#flameGrad)" opacity="0.9"/>
+    <circle cx="0" cy="-12" r="8" fill="#ff9a00" opacity="0.15" filter="url(#glow)"/>
+    <!-- Decorative chains -->
+    <line x1="-18" y1="8" x2="-26" y2="28" stroke="url(#goldGrad)" stroke-width="1.2" opacity="0.7"/>
+    <line x1="18"  y1="8" x2="26"  y2="28" stroke="url(#goldGrad)" stroke-width="1.2" opacity="0.7"/>
+    <circle cx="-26" cy="30" r="4" fill="url(#goldGrad)" opacity="0.8"/>
+    <circle cx="26"  cy="30" r="4" fill="url(#goldGrad)" opacity="0.8"/>
+  </g>
+
+  <!-- ═══ OM SYMBOL (subtle, center arch) ═══ -->
+  <text x="900" y="310" text-anchor="middle"
+        font-family="serif" font-size="72" fill="url(#goldGrad)"
+        opacity="0.22" filter="url(#glow)">ॐ</text>
+
+  <!-- ═══ LOTUS BASE ═══ -->
+  <g transform="translate(900,760)" opacity="0.35">
+    <path d="M-120 0 Q-80 -40 -40 -20 Q0 -50 40 -20 Q80 -40 120 0Z" fill="url(#goldGrad)"/>
+    <path d="M-80 0 Q-50 -30 -20 -15 Q0 -35 20 -15 Q50 -30 80 0Z" fill="url(#goldSoft)"/>
+    <ellipse cx="0" cy="0" rx="50" ry="12" fill="url(#goldGrad)" opacity="0.5"/>
+  </g>
+
+  <!-- ═══ RANGOLI DOTS (floor) ═══ -->
+  <g fill="url(#goldGrad)" opacity="0.25">
+    <circle cx="700" cy="740" r="4"/><circle cx="730" cy="750" r="3"/>
+    <circle cx="760" cy="745" r="4"/><circle cx="790" cy="752" r="3"/>
+    <circle cx="820" cy="742" r="4"/><circle cx="850" cy="754" r="3"/>
+    <circle cx="1000" cy="740" r="4"/><circle cx="1030" cy="750" r="3"/>
+    <circle cx="1060" cy="745" r="4"/><circle cx="1090" cy="752" r="3"/>
+  </g>
+
+  <!-- ═══ STAR SPARKLES ═══ -->
+  <g fill="#f5d98a" filter="url(#glow)" opacity="0.5">
+    <path d="M730 180 L732 190 L742 192 L732 194 L730 204 L728 194 L718 192 L728 190Z" transform="scale(0.7) translate(330,60)"/>
+    <path d="M1100 200 L1102 210 L1112 212 L1102 214 L1100 224 L1098 214 L1088 212 L1098 210Z" transform="scale(0.5) translate(1200,180)"/>
+    <path d="M680 350 L681 356 L687 357 L681 358 L680 364 L679 358 L673 357 L679 356Z"/>
+    <path d="M1120 320 L1121 326 L1127 327 L1121 328 L1120 334 L1119 328 L1113 327 L1119 326Z"/>
+    <path d="M900 200 L901 204 L905 205 L901 206 L900 210 L899 206 L895 205 L899 204Z"/>
+  </g>
+
+  <!-- ═══ GOLD BORDER TOP & BOTTOM ═══ -->
+  <rect x="0"   y="0"   width="1400" height="6" fill="url(#goldGrad)" opacity="0.6"/>
+  <rect x="0"   y="794" width="1400" height="6" fill="url(#goldGrad)" opacity="0.6"/>
+  <!-- Corner ornaments -->
+  <circle cx="20"   cy="20"  r="10" fill="url(#goldGrad)" opacity="0.5"/>
+  <circle cx="1380" cy="20"  r="10" fill="url(#goldGrad)" opacity="0.5"/>
+  <circle cx="20"   cy="780" r="10" fill="url(#goldGrad)" opacity="0.5"/>
+  <circle cx="1380" cy="780" r="10" fill="url(#goldGrad)" opacity="0.5"/>
+
+</svg>

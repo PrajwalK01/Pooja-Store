@@ -3,119 +3,134 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f3f1e8">
-<title>{{ cfg.salon }} -- Hair Salon</title>
-<meta name="description" content="Expert cuts, clean shaves, beard styling and more at {{ cfg.salon }}. Book your appointment online.">
+<meta name="theme-color" content="#fdf6e3">
+<title>{{ cfg.salon }} — Pooja Store</title>
+<meta name="description" content="Sacred idols, diyas, incense, flowers and divine pooja essentials at {{ cfg.salon }}. Order online or visit our store.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>S</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🪔</text></svg>">
 <script>window.CFG = {{ cfg|tojson }};</script>
 </head>
 <body>
 
-<!-- preloader -->
+<!-- ── Preloader ── -->
 <div id="preloader">
-  <div class="coin">{{ cfg.salon }}</div>
-  <div class="bar"><i></i></div>
-  <div style="color:var(--muted);font-size:.75rem;letter-spacing:.3em">HAIR SALON</div>
+  <div class="diya-wrap">
+    <div class="diya-glow"></div>
+    <div class="diya-flame"></div>
+    <div class="diya-body"></div>
+  </div>
+  <div class="preloader-name">{{ cfg.salon }}</div>
+  <div class="preloader-sub">Pooja Store</div>
+  <div class="preloader-bar"><i></i></div>
 </div>
 
+<!-- ── Nav ── -->
 <nav>
   <a class="logo" href="#top" aria-label="{{ cfg.salon }} home">
-    <span class="logo-mark">*</span><span class="logo-type">{{ cfg.salon }}<small>HAIR SALON</small></span>
+    <span class="logo-mark">🪔</span>
+    <span class="logo-type">{{ cfg.salon }}<small>POOJA STORE</small></span>
   </a>
   <div class="nav-links">
     <a class="active" href="#top">Home</a>
-    <a href="/services">Services</a>
-    <a href="/gallery">Gallery</a>
-    <a href="/booking">Book</a>
+    <a href="/services">Products</a>
+    <a href="/booking">Order</a>
     <a href="/reviews">Reviews</a>
-    <a href="#location">Location</a>
-    <a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a>
+    <a href="#location">Visit Us</a>
     <a class="nav-login" href="/admin">Login</a>
   </div>
   <div style="display:flex;gap:10px;align-items:center">
-    <a class="nav-cta" href="/booking">Book Now →</a>
+    <a class="nav-cta" href="/booking">Order Now →</a>
     <button id="menu-btn" aria-label="Open navigation">Menu</button>
   </div>
 </nav>
 
+<!-- ── Mobile Menu ── -->
 <div id="mobile-menu">
   <button id="menu-close" class="close" aria-label="Close navigation">Close</button>
   <a href="#top">Home</a>
-  <a href="/services">Services</a>
-  <a href="/gallery">Gallery</a>
-  <a href="/booking">Book</a>
+  <a href="/services">Products</a>
+  <a href="/booking">Order</a>
   <a href="/reviews">Reviews</a>
-  <a href="#location">Location</a>
-  <a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a>
+  <a href="#location">Visit Us</a>
   <a href="/admin">Login</a>
 </div>
 
-<!-- hero -->
+<!-- ── Hero ── -->
 <header class="hero" id="top">
-  <div class="bg"></div><div class="shade"></div>
+  <div class="bg"></div>
+  <div class="shade"></div>
   <div class="hero-copy">
-    <p class="hero-kicker">{{ cfg.salon }} -- Your neighbourhood barber</p>
-    <h1><span>Great hair,</span><br><strong>every time.</strong></h1>
-    <p class="hero-description">Expert cuts, clean shaves, beard styling and more. Walk in or book your chair online -- no fuss.</p>
+    <p class="hero-kicker">{{ cfg.salon }} &nbsp;✦&nbsp; Your Divine Pooja Destination</p>
+    <h1><span>Pure devotion,</span><br><strong>every time.</strong></h1>
+    <p class="hero-description">
+      Sacred idols, diyas, incense, flowers and all pooja essentials.<br>
+      Browse online or visit our store — blessings await.
+    </p>
     <div class="hero-actions">
-      <a class="btn btn-pink" href="/booking">Book a chair →</a>
-      <a class="btn btn-ghost wa-link" href="#">WhatsApp us</a>
+      <a class="btn btn-pink" href="/booking">Order Now →</a>
+      <a class="btn btn-ghost wa-link" href="#">WhatsApp Us</a>
     </div>
   </div>
 </header>
 
-<div class="signature-strip" id="service-highlights" aria-label="Salon services"></div>
+<!-- ── Product highlights strip ── -->
+<div class="signature-strip" id="service-highlights" aria-label="Featured pooja products"></div>
 
-<!-- location -->
-<section id="location">
-  <h2 class="section-title chrome">Come Find Your Chair</h2>
-  <p class="section-sub">Your neighborhood salon. Walk in or book ahead.</p>
+<!-- ── Location ── -->
+<section id="location" class="fade-in">
+  <h2 class="section-title chrome">Come Visit Our Store</h2>
+  <p class="section-sub">Your neighbourhood pooja store. Walk in or order ahead.</p>
   <div class="loc-card">
-    <div class="loc-pin" aria-hidden="true"></div>
-    <h3 class="neon-cyan" id="loc-name">{{ cfg.salon }}</h3>
-    <p>{% if cfg.maps_query %}{{ cfg.maps_query }} · {% endif %}Walk-ins welcome · Appointments available online.</p>
-    <div class="hours-list" aria-label="Weekly opening hours">
+    <div class="loc-pin" aria-hidden="true">🛕</div>
+    <h3 id="loc-name">{{ cfg.salon }}</h3>
+    <p>{% if cfg.maps_query %}{{ cfg.maps_query }} &nbsp;·&nbsp; {% endif %}Walk-ins welcome &nbsp;·&nbsp; Orders available online.</p>
+    <div class="hours-list" aria-label="Weekly store hours">
       {% if cfg.hours %}
-      {% set day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] %}
+      {% set day_names = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"] %}
       {% for day in range(7) %}
       {% set day_hours = cfg.hours[day|string] %}
-      <div><span>{{ day_names[day] }}</span><time>{% if day_hours %}{{ "%02d:00"|format(day_hours[0]) }}--{{ "%02d:00"|format(day_hours[1]) }}{% else %}Closed{% endif %}</time></div>
+      <div>
+        <span>{{ day_names[day] }}</span>
+        <time>{% if day_hours %}{{ "%02d:00"|format(day_hours[0]) }} – {{ "%02d:00"|format(day_hours[1]) }}{% else %}Closed{% endif %}</time>
+      </div>
       {% endfor %}
       {% else %}
-      <p class="empty-state">Opening hours have not been added yet.</p>
+      <p class="empty-state">Store hours will be added soon.</p>
       {% endif %}
     </div>
     <div class="location-actions">
-      <a class="btn btn-pink" id="maps-link" href="#" target="_blank" rel="noopener">Get directions →</a>
-      <a class="btn btn-ghost wa-link" href="#">Message the salon</a>
+      <a class="btn btn-pink" id="maps-link" href="#" target="_blank" rel="noopener">Get Directions →</a>
+      <a class="btn btn-ghost wa-link" href="#">WhatsApp the Store</a>
     </div>
   </div>
 </section>
 
+<!-- ── Footer ── -->
 <footer>
-  <p class="footer-brand">{{ cfg.salon }} <span>· HAIR SALON</span></p>
-  <p style="margin-top:8px">© {{ cfg.year }} {{ cfg.salon }}. Good cuts, good people.</p>
+  <p class="footer-brand">{{ cfg.salon }} <span>· POOJA STORE</span></p>
+  <p style="margin-top:8px;color:var(--muted)">© {{ cfg.year }} {{ cfg.salon }}. Pure items, divine blessings.</p>
   <p class="footer-links">
-    <a href="/services">Services</a>
-    <a href="/gallery">Gallery</a>
+    <a href="/services">Products</a>
+    <a href="/booking">Order</a>
     <a href="/reviews">Reviews</a>
-    <a href="/booking">Book</a>
-    <a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a>
-    <a href="/admin">Staff login</a>
+    <a href="/admin">Staff Login</a>
   </p>
 </footer>
 
-<!-- WhatsApp FAB + sticky mobile CTA -->
+<!-- ── WhatsApp FAB ── -->
 <a class="fab-wa wa-link" href="#" aria-label="WhatsApp">
   <svg viewBox="0 0 32 32"><path d="M16 3C9.4 3 4 8.3 4 14.9c0 2.6.8 5 2.3 7L4 29l7.3-2.3c1.9 1 4 1.6 6.2 1.6h.5c6.6 0 12-5.3 12-11.9C30 8.3 24.6 3 18 3h-2zm0 22.5c-1.9 0-3.7-.5-5.3-1.5l-.4-.2-4 1.3 1.2-3.9-.3-.4c-1.2-1.8-1.9-3.9-1.9-6.1C5.3 9.5 10.1 4.8 16 4.8S26.7 9.5 26.7 15.2 21.9 25.5 16 25.5zm5.8-7.7c-.3-.2-1.9-1-2.2-1.1-.3-.1-.5-.2-.7.2-.2.3-.8 1.1-1 1.3-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.3-.2-.3 0-.5.1-.7l.5-.6c.2-.2.2-.3.3-.6.1-.2.1-.4 0-.6-.1-.2-.7-1.8-1-2.4-.3-.6-.5-.5-.7-.6h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.2 1.3 3.4c.2.2 2.3 3.5 5.5 4.9.8.3 1.4.5 1.9.7.8.2 1.5.2 2 .1.6-.1 1.9-.8 2.2-1.5.3-.8.3-1.4.2-1.5-.1-.2-.3-.3-.6-.4z"/></svg>
 </a>
+
+<!-- ── Sticky mobile CTA ── -->
 <div class="cta-bar">
-  <a class="btn btn-pink" href="/booking">Book a chair</a>
+  <a class="btn btn-pink" href="/booking">Order Now</a>
   <a class="btn btn-ghost wa-link" href="#">WhatsApp</a>
 </div>
 
 <div id="toast"></div>
-<script src="{{ url_for('static', filename='js/main.js') }}?v=5"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}?v=6"></script>
 </body>
 </html>

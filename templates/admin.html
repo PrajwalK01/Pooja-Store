@@ -3,106 +3,149 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f3f1e8">
-<title>{{ cfg.salon }} -- Admin</title>
+<meta name="theme-color" content="#fdf6e3">
+<title>{{ cfg.salon }} — Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <script>window.CFG = {{ cfg|tojson }};</script>
 </head>
 <body>
+
 <nav>
-  <a class="logo" href="/" aria-label="{{ cfg.salon }} home"><span class="logo-mark">*</span><span class="logo-type">{{ cfg.salon }}<small>HAIR SALON</small></span></a>
+  <a class="logo" href="/" aria-label="{{ cfg.salon }} home">
+    <span class="logo-mark">🪔</span>
+    <span class="logo-type">{{ cfg.salon }}<small>POOJA STORE</small></span>
+  </a>
   <div class="nav-links">
-    <a href="/">Home</a><a href="/services">Services</a><a href="/gallery">Gallery</a>
-    <a href="/booking">Book</a><a href="/reviews">Reviews</a>
+    <a href="/">Home</a>
+    <a href="/services">Products</a>
+    <a href="/booking">Order</a>
+    <a href="/reviews">Reviews</a>
   </div>
-  <button class="nav-cta" id="logout-btn">Log out</button>
+  <button class="nav-cta" id="logout-btn">Log Out</button>
 </nav>
 
 <div class="admin-wrap">
-  <h1 class="chrome">Salon dashboard</h1>
-  <p style="color:var(--muted);margin-top:6px"><span class="mode-chip" id="mode-chip">...</span></p>
+  <h1 class="chrome" style="font-size:2rem">Store Dashboard</h1>
+  <p style="color:var(--muted);margin-top:6px">
+    <span class="mode-chip" id="mode-chip">…</span>
+    &nbsp;Welcome, Chandan 🙏
+  </p>
+
   <div class="admin-tabs" role="tablist" aria-label="Admin sections">
-    <button class="active" role="tab" aria-selected="true" data-admin-tab="bookings-panel">Bookings</button>
-    <button role="tab" aria-selected="false" data-admin-tab="services-panel">Services</button>
-    <button role="tab" aria-selected="false" data-admin-tab="gallery-panel">Gallery</button>
+    <button class="active" role="tab" aria-selected="true"  data-admin-tab="bookings-panel">Orders</button>
+    <button role="tab" aria-selected="false" data-admin-tab="services-panel">Products</button>
     <button role="tab" aria-selected="false" data-admin-tab="settings-panel">Settings</button>
   </div>
 
+  <!-- ── Orders panel ── -->
   <section class="admin-panel" id="bookings-panel" role="tabpanel">
     <div class="stat-grid" id="stat-grid"></div>
-    <h2 class="admin-section-title">Appointments</h2>
+    <h2 class="admin-section-title">Customer Orders</h2>
     <div id="bk-list"></div>
   </section>
 
+  <!-- ── Products panel ── -->
   <section class="admin-panel" id="services-panel" role="tabpanel" hidden>
-    <h2 class="admin-section-title">Manage services</h2>
+    <h2 class="admin-section-title">Manage Products</h2>
     <form id="service-form" class="admin-editor">
       <input type="hidden" id="service-id">
-      <div class="field"><label for="service-name">Service name</label><input id="service-name" maxlength="60" required></div>
-      <div class="field"><label for="service-description">Description</label><textarea id="service-description" maxlength="240" required></textarea></div>
-      <div class="admin-editor-row">
-        <div class="field"><label for="service-price">Price (<span id="admin-currency">{{ cfg.currency }}</span>)</label><input id="service-price" type="number" min="1" max="1000000" required></div>
-        <div class="field"><label for="service-minutes">Duration (minutes)</label><input id="service-minutes" type="number" min="10" max="600" required></div>
-        <div class="field"><label for="service-icon">Icon (optional)</label><input id="service-icon" maxlength="8" value="-" required></div>
+      <div class="field">
+        <label for="service-name">Product Name</label>
+        <input id="service-name" maxlength="60" required placeholder="e.g. Ganesha Idol, Rose Incense…">
       </div>
-      <div class="admin-form-actions"><button class="btn btn-pink" id="service-submit">Add service</button><button class="btn btn-ghost" id="service-cancel" type="button" hidden>Cancel edit</button></div>
+      <div class="field">
+        <label for="service-description">Description</label>
+        <textarea id="service-description" maxlength="240" required placeholder="Short description of the item…"></textarea>
+      </div>
+      <div class="admin-editor-row">
+        <div class="field">
+          <label for="service-price">Price (<span id="admin-currency">{{ cfg.currency }}</span>)</label>
+          <input id="service-price" type="number" min="1" max="1000000" required placeholder="e.g. 150">
+        </div>
+        <!-- Duration hidden — backend still saves it silently as 0 -->
+        <input type="hidden" id="service-minutes" value="0">
+        <div class="field">
+          <label for="service-icon">Icon / Emoji</label>
+          <input id="service-icon" maxlength="8" value="🪔" required placeholder="🪔">
+        </div>
+      </div>
+      <div class="admin-form-actions">
+        <button class="btn btn-pink" id="service-submit">Add Product</button>
+        <button class="btn btn-ghost" id="service-cancel" type="button" hidden>Cancel Edit</button>
+      </div>
     </form>
     <div id="service-list" class="managed-list"></div>
   </section>
 
-  <section class="admin-panel" id="gallery-panel" role="tabpanel" hidden>
-    <h2 class="admin-section-title">Manage gallery photos</h2>
-    <form id="gallery-form" class="admin-editor" enctype="multipart/form-data">
-      <div class="field"><label for="gallery-photo">Photo</label><input id="gallery-photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp" required></div>
-      <div class="admin-editor-row">
-        <div class="field"><label for="gallery-title">Photo title</label><input id="gallery-title" name="title" maxlength="80" required></div>
-        <div class="field"><label for="gallery-stylist">Stylist (optional)</label><input id="gallery-stylist" name="stylist" maxlength="60"></div>
-      </div>
-      <button class="btn btn-pink">Add photo</button>
-      <p class="admin-help">JPG, PNG, or WebP - maximum 8 MB</p>
-    </form>
-    <div id="admin-gallery-list" class="managed-gallery"></div>
-  </section>
-
+  <!-- ── Settings panel ── -->
   <section class="admin-panel" id="settings-panel" role="tabpanel" hidden>
-    <h2 class="admin-section-title">Salon settings</h2>
+    <h2 class="admin-section-title">Store Settings</h2>
     <form id="settings-form" class="admin-editor">
-      <div class="field"><label for="settings-salon">Salon name</label><input id="settings-salon" maxlength="80" required></div>
-      <div class="field"><label for="settings-currency">Price currency symbol</label><input id="settings-currency" maxlength="8" required></div>
-      <div class="field"><label for="settings-maps">Full address or Maps search (optional)</label><input id="settings-maps" maxlength="180"></div>
-      <div class="field"><label for="settings-whatsapp">WhatsApp number, with country code</label><input id="settings-whatsapp" inputmode="numeric" placeholder="Digits only, or leave blank" maxlength="15"></div>
+      <div class="field">
+        <label for="settings-salon">Store Name</label>
+        <input id="settings-salon" maxlength="80" required placeholder="Gayathri Pooja Store">
+      </div>
+      <div class="field">
+        <label for="settings-currency">Price Currency Symbol</label>
+        <input id="settings-currency" maxlength="8" required placeholder="₹">
+      </div>
+      <div class="field">
+        <label for="settings-maps">Full Address (for Google Maps)</label>
+        <input id="settings-maps" maxlength="180" placeholder="e.g. 12 Temple Road, Bangalore">
+      </div>
+      <div class="field">
+        <label for="settings-whatsapp">WhatsApp Number (with country code)</label>
+        <input id="settings-whatsapp" inputmode="numeric" placeholder="919108622221" maxlength="15">
+      </div>
 
       <div class="settings-group">
-        <h3>Booking capacity</h3>
+        <h3>Order Capacity</h3>
         <div class="admin-editor-row">
-          <div class="field"><label for="settings-max-per-slot">Max bookings per 30-min slot</label><input id="settings-max-per-slot" type="number" min="1" max="50" value="1" required></div>
+          <div class="field">
+            <label for="settings-max-per-slot">Max orders per 30-min slot</label>
+            <input id="settings-max-per-slot" type="number" min="1" max="50" value="1" required>
+          </div>
         </div>
       </div>
 
       <div class="settings-group">
-        <h3>Lunch break</h3>
-        <p class="admin-help">Customers cannot book during this time. Enter hour in 24h (e.g. 13 = 1 PM). Set both to 0 to disable.</p>
+        <h3>Lunch / Break Time</h3>
+        <p class="admin-help">Customers cannot order during this time. Enter hour in 24h (e.g. 13 = 1 PM). Set both to 0 to disable.</p>
         <div class="admin-editor-row">
-          <div class="field"><label for="settings-lunch-start">Lunch start hour (0-23)</label><input id="settings-lunch-start" type="number" min="0" max="23" value="0"><span class="admin-help" id="lunch-start-hint"></span></div>
-          <div class="field"><label for="settings-lunch-end">Lunch end hour (0-24)</label><input id="settings-lunch-end" type="number" min="0" max="24" value="0"><span class="admin-help" id="lunch-end-hint"></span></div>
+          <div class="field">
+            <label for="settings-lunch-start">Break start hour (0–23)</label>
+            <input id="settings-lunch-start" type="number" min="0" max="23" value="0">
+            <span class="admin-help" id="lunch-start-hint"></span>
+          </div>
+          <div class="field">
+            <label for="settings-lunch-end">Break end hour (0–24)</label>
+            <input id="settings-lunch-end" type="number" min="0" max="24" value="0">
+            <span class="admin-help" id="lunch-end-hint"></span>
+          </div>
         </div>
       </div>
 
       <div class="settings-group">
-        <div class="settings-group-heading"><h3>Stylists</h3><button class="mini-btn" id="stylist-add" type="button">Add stylist</button></div>
+        <div class="settings-group-heading">
+          <h3>Staff Members</h3>
+          <button class="mini-btn" id="stylist-add" type="button">Add Staff</button>
+        </div>
         <div id="stylist-list" class="stylist-editor-list"></div>
       </div>
 
       <div class="settings-group">
-        <h3>Weekly opening hours</h3>
+        <h3>Weekly Store Hours</h3>
         <div id="hours-editor" class="hours-editor"></div>
       </div>
-      <button class="btn btn-pink">Save salon settings</button>
+
+      <button class="btn btn-pink" style="margin-top:10px">Save Store Settings</button>
     </form>
   </section>
 </div>
 
 <div id="toast"></div>
-<script src="{{ url_for('static', filename='js/main.js') }}?v=5"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}?v=6"></script>
 </body>
 </html>

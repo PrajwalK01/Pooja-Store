@@ -2,63 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f3f1e8">
-<title>Gallery — {{ cfg.salon }}</title>
-<meta name="description" content="See fresh cuts and signature styles from {{ cfg.salon }}.">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-<script>window.CFG = {{ cfg|tojson }};</script>
+<meta http-equiv="refresh" content="0; url=/">
+<title>Redirecting — {{ cfg.salon }}</title>
 </head>
 <body>
-<nav>
-  <a class="logo" href="/" aria-label="{{ cfg.salon }} home"><span class="logo-mark">*</span><span class="logo-type">{{ cfg.salon }}<small>HAIR SALON</small></span></a>
-  <div class="nav-links">
-    <a href="/">Home</a>
-    <a href="/services">Services</a>
-    <a href="/gallery" aria-current="page">Gallery</a>
-    <a href="/booking">Book</a>
-    <a href="/reviews">Reviews</a>
-    <a href="/#location">Location</a>
-    <a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a><a href="/admin">Login</a>
-  </div>
-  <div style="display:flex;gap:10px;align-items:center">
-    <a class="nav-cta" href="/booking">Book Now</a>
-    <button id="menu-btn" aria-label="Open navigation">Menu</button>
-  </div>
-</nav>
-
-<div id="mobile-menu">
-  <button id="menu-close" class="close" aria-label="Close navigation">Close</button>
-  <a href="/">Home</a>
-  <a href="/services">Services</a>
-  <a href="/gallery">Gallery</a>
-  <a href="/booking">Book</a>
-  <a href="/reviews">Reviews</a>
-  <a href="/#location">Location</a>
-  <a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a><a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a><a href="/admin">Login</a>
-</div>
-
-<main class="page-main">
-  <header class="page-heading">
-    <p class="page-kicker">{{ cfg.salon }} · GALLERY</p>
-    <h1 class="chrome">The Lookbook</h1>
-    <p>Fresh cuts and transformations from our chairs.</p>
-  </header>
-  <section class="page-section gallery-page-grid">
-    {% for photo in photos %}
-    <article class="g-item"><img src="{{ photo.src }}" alt="{{ photo.title }}{% if photo.stylist %} by {{ photo.stylist }}{% endif %}" loading="lazy"><div class="cap"><b>{{ photo.title }}</b>{% if photo.stylist %} · {{ photo.stylist }}{% endif %}</div></article>
-    {% else %}
-    <p class="empty-state">New salon photos coming soon.</p>
-    {% endfor %}
-  </section>
-</main>
-
-<footer>
-  <p class="footer-brand">{{ cfg.salon }} <span>· HAIR SALON</span></p>
-  <p style="margin-top:8px">© {{ cfg.year }} {{ cfg.salon }}.</p>
-  <p class="page-footer-links"><a href="/">Home</a><a href="/services">Services</a><a href="/booking">Book</a><a href="/reviews">Reviews</a><a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a><a href="/admin">Staff Login</a></p>
-</footer>
-<div id="toast"></div>
-<script src="{{ url_for('static', filename='js/main.js') }}?v=5"></script>
+<p>Redirecting to <a href="/">{{ cfg.salon }}</a>…</p>
 </body>
 </html>

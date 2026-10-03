@@ -3,49 +3,89 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f3f1e8">
+<meta name="theme-color" content="#fdf6e3">
 <title>Create Admin Account — {{ salon_name }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+
 <nav>
-  <a class="logo" href="/" aria-label="{{ salon_name }} home"><span class="logo-mark">*</span><span class="logo-type">{{ salon_name }}<small>HAIR SALON</small></span></a>
+  <a class="logo" href="/" aria-label="{{ salon_name }} home">
+    <span class="logo-mark">🪔</span>
+    <span class="logo-type">{{ salon_name }}<small>POOJA STORE</small></span>
+  </a>
   <div class="nav-links">
-    <a href="/">Home</a><a href="/services">Services</a><a href="/gallery">Gallery</a>
-    <a href="/booking">Book</a><a href="/reviews">Reviews</a><a href="/#location">Location</a>
+    <a href="/">Home</a>
+    <a href="/services">Products</a>
+    <a href="/booking">Order</a>
+    <a href="/reviews">Reviews</a>
+    <a href="/#location">Visit Us</a>
     <a href="/admin/login">Login</a>
   </div>
-  <a class="nav-cta" href="/booking">Book now</a>
+  <a class="nav-cta" href="/booking">Order Now</a>
   <button id="menu-btn" aria-label="Open navigation">Menu</button>
 </nav>
+
 <div id="mobile-menu">
   <button id="menu-close" class="close" aria-label="Close navigation">Close</button>
-  <a href="/">Home</a><a href="/services">Services</a><a href="/gallery">Gallery</a>
-  <a href="/booking">Book</a><a href="/reviews">Reviews</a><a href="/#location">Location</a><a href="/admin/login">Login</a>
+  <a href="/">Home</a>
+  <a href="/services">Products</a>
+  <a href="/booking">Order</a>
+  <a href="/reviews">Reviews</a>
+  <a href="/#location">Visit Us</a>
+  <a href="/admin/login">Login</a>
 </div>
 
 <main class="admin-wrap">
   <div class="login-box">
     {% if authenticated or (first_admin and setup_available) %}
-    <h1 class="chrome auth-title">{% if first_admin %}Set up your admin{% else %}Add admin account{% endif %}</h1>
-    <p class="auth-note">{% if first_admin %}Create the first account using the one-time setup key in your environment settings.{% else %}Only signed-in admins can create another staff account.{% endif %}</p>
+    <h1 class="chrome auth-title">
+      {% if first_admin %}Set Up Admin Account{% else %}Add Staff Account{% endif %}
+    </h1>
+    <p class="auth-note">
+      {% if first_admin %}
+        Create the first account using the one-time setup key from your environment settings.
+      {% else %}
+        Only signed-in admins can create another staff account.
+      {% endif %}
+    </p>
     <form id="signup-form">
-      <div class="field"><label for="signup-username">Username</label><input id="signup-username" autocomplete="username" minlength="3" maxlength="32" required></div>
-      <div class="field"><label for="signup-password">Password</label><input type="password" id="signup-password" autocomplete="new-password" minlength="10" required></div>
-      {% if first_admin %}<div class="field"><label for="setup-key">One-time setup key</label><input type="password" id="setup-key" autocomplete="off" required></div>{% endif %}
-      <button class="btn btn-pink" style="width:100%">Create account →</button>
+      <div class="field">
+        <label for="signup-username">Username</label>
+        <input id="signup-username" autocomplete="username" minlength="3" maxlength="32" required placeholder="Choose a username">
+      </div>
+      <div class="field">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" autocomplete="new-password" minlength="10" required placeholder="Minimum 10 characters">
+      </div>
+      {% if first_admin %}
+      <div class="field">
+        <label for="setup-key">One-Time Setup Key</label>
+        <input type="password" id="setup-key" autocomplete="off" required placeholder="From your .env file">
+      </div>
+      {% endif %}
+      <button class="btn btn-pink" style="width:100%;margin-top:6px">Create Account →</button>
     </form>
+
     {% elif first_admin %}
-    <h1 class="chrome auth-title">Setup required</h1>
-    <p class="auth-note">Set a private <code>ADMIN_SETUP_KEY</code> in your <code>.env</code> before creating the first account.</p>
+    <h1 class="chrome auth-title">Setup Required</h1>
+    <p class="auth-note">
+      Set a private <code>ADMIN_SETUP_KEY</code> in your <code>.env</code> before creating the first account.
+    </p>
     {% else %}
-    <h1 class="chrome auth-title">Signup is closed</h1>
-    <p class="auth-note">An admin account already exists. Ask the salon owner to create your account.</p>
+    <h1 class="chrome auth-title">Signup Closed</h1>
+    <p class="auth-note">
+      An admin account already exists. Ask the store owner to create your account.
+    </p>
     {% endif %}
-    <p class="auth-switch"><a href="/admin/login">Back to login</a></p>
+
+    <p class="auth-switch"><a href="/admin/login">← Back to Login</a></p>
   </div>
 </main>
+
 <div id="toast"></div>
-<script src="{{ url_for('static', filename='js/main.js') }}?v=5"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}?v=6"></script>
 </body>
 </html>

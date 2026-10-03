@@ -3,26 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f3f1e8">
-<title>Services — {{ cfg.salon }}</title>
-<meta name="description" content="Explore cuts, color, perms, and salon services at {{ cfg.salon }}.">
+<meta name="theme-color" content="#fdf6e3">
+<title>Products — {{ cfg.salon }}</title>
+<meta name="description" content="Explore sacred pooja items — idols, diyas, incense, kalash and more at {{ cfg.salon }}.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <script>window.CFG = {{ cfg|tojson }};</script>
 </head>
 <body>
+
 <nav>
-  <a class="logo" href="/" aria-label="{{ cfg.salon }} home"><span class="logo-mark">*</span><span class="logo-type">{{ cfg.salon }}<small>HAIR SALON</small></span></a>
+  <a class="logo" href="/" aria-label="{{ cfg.salon }} home">
+    <span class="logo-mark">🪔</span>
+    <span class="logo-type">{{ cfg.salon }}<small>POOJA STORE</small></span>
+  </a>
   <div class="nav-links">
     <a href="/">Home</a>
-    <a href="/services" aria-current="page">Services</a>
-    <a href="/gallery">Gallery</a>
-      <a href="/booking">Book</a>
-      <a href="/reviews">Reviews</a>
-    <a href="/#location">Location</a>
-    <a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a><a href="/admin">Login</a>
+    <a href="/services" aria-current="page" class="active">Products</a>
+    <a href="/booking">Order</a>
+    <a href="/reviews">Reviews</a>
+    <a href="/#location">Visit Us</a>
+    <a class="nav-login" href="/admin">Login</a>
   </div>
   <div style="display:flex;gap:10px;align-items:center">
-      <a class="nav-cta" href="/booking">Book Now</a>
+    <a class="nav-cta" href="/booking">Order Now</a>
     <button id="menu-btn" aria-label="Open navigation">Menu</button>
   </div>
 </nav>
@@ -30,31 +35,37 @@
 <div id="mobile-menu">
   <button id="menu-close" class="close" aria-label="Close navigation">Close</button>
   <a href="/">Home</a>
-  <a href="/services">Services</a>
-  <a href="/gallery">Gallery</a>
-    <a href="/booking">Book</a>
-    <a href="/reviews">Reviews</a>
-  <a href="/#location">Location</a>
-  <a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a><a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a><a href="/admin">Login</a>
+  <a href="/services">Products</a>
+  <a href="/booking">Order</a>
+  <a href="/reviews">Reviews</a>
+  <a href="/#location">Visit Us</a>
+  <a href="/admin">Login</a>
 </div>
 
 <main class="page-main">
-  <header class="page-heading">
-      <p class="page-kicker">{{ cfg.salon }} · SERVICES</p>
-      <h1 class="chrome">Services &amp; Pricing</h1>
-      <p>Choose your service and book a time that works for you.</p>
+  <header class="page-heading fade-in">
+    <p class="page-kicker">{{ cfg.salon }} &nbsp;✦&nbsp; PRODUCTS</p>
+    <h1 class="chrome">Our Products &amp; Pricing</h1>
+    <div class="om-divider">✦ ॐ ✦</div>
+    <p>Browse our sacred pooja essentials and place your order online.</p>
   </header>
   <section class="page-section">
-    <div class="cards" id="services-grid"></div>
+    <div class="cards fade-in" id="services-grid"></div>
   </section>
 </main>
 
 <footer>
-  <p class="footer-brand">{{ cfg.salon }} <span>· HAIR SALON</span></p>
+  <p class="footer-brand">{{ cfg.salon }} <span>· POOJA STORE</span></p>
   <p style="margin-top:8px">© {{ cfg.year }} {{ cfg.salon }}.</p>
-  <p class="page-footer-links"><a href="/">Home</a><a href="/gallery">Gallery</a><a href="https://www.instagram.com/star_007_salon" target="_blank" rel="noopener">Instagram</a><a href="/admin">Staff Login</a></p>
+  <p class="page-footer-links">
+    <a href="/">Home</a>
+    <a href="/booking">Order</a>
+    <a href="/reviews">Reviews</a>
+    <a href="/admin">Staff Login</a>
+  </p>
 </footer>
+
 <div id="toast"></div>
-<script src="{{ url_for('static', filename='js/main.js') }}?v=5"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}?v=6"></script>
 </body>
 </html>
