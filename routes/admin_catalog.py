@@ -186,7 +186,13 @@ def admin_gallery():
             photo_data["storage_path"] = f"gallery/{photo_id}{extension}"
             photo_data["src"] = db.upload_gallery_image(upload.stream, photo_data["storage_path"], upload.mimetype)
         except Exception as e:
-            return jsonify({"error": f"Firebase Storage error: {str(e)}"}), 502
+            # Firebase Storage bucket not available — fall back to local disk
+            photo_data.pop("storage_path", None)
+            stored_name = f"uploads/{photo_id}{extension}"
+            target = Path(current_app.static_folder) / "images" / stored_name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            upload.stream.seek(0)
+            upload.save(target)
     else:
         # local disk fallback
         stored_name = f"uploads/{photo_id}{extension}"

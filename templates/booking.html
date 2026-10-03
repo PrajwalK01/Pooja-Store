@@ -39,7 +39,11 @@
       <h3 id="wiz-title" style="margin-bottom:14px;color:var(--cyan)">Pick your service</h3>
       <div class="step on" id="step-1"><div class="opts"></div></div>
       <div class="step" id="step-2">
-        <div class="field"><label for="book-date">Appointment date</label><input type="date" id="book-date"></div>
+        <div class="field">
+          <label for="book-date">Appointment date (DD/MM/YYYY)</label>
+          <input type="text" id="book-date-display" placeholder="DD/MM/YYYY" maxlength="10" autocomplete="off" inputmode="numeric">
+          <input type="hidden" id="book-date">
+        </div>
         <div class="field"><label>Available times</label><div class="slots" id="slots"><p style="color:var(--muted)">Choose a date to see available slots.</p></div></div>
       </div>
       <div class="step" id="step-3">

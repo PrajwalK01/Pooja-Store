@@ -153,9 +153,11 @@ async function loadSlots() {
 
 function renderSummary() {
   const s = CFG.services.find(x => x.id === wiz.service);
+  const [y, m, d] = wiz.date.split("-");
+  const displayDate = `${d}/${m}/${y}`;
   $("#summary").innerHTML =
     `<b>${escapeHTML(s.icon)} ${escapeHTML(s.name)}</b> — ${money(s.price)} (${s.mins} min)<br>` +
-    `Date: <b>${wiz.date}</b> at <b>${wiz.time}</b>`;
+    `Date: <b>${displayDate}</b> at <b>${wiz.time}</b>`;
 }
 
 function wizValidate() {
@@ -202,8 +204,58 @@ function bindWizard() {
     wiz.step = 2;
   }
   renderStep1();
-  $("#book-date").min = todayStr();
-  $("#book-date").max = todayStr(30);
+
+  // Custom DD/MM/YYYY date input
+  const displayInput = $("#book-date-display");
+  const hiddenInput = $("#book-date");
+
+  function parseDisplayDate(val) {
+    // Accept DD/MM/YYYY or DDMMYYYY
+    const clean = val.replace(/\D/g, "");
+    if (clean.length === 8) {
+      const dd = clean.slice(0, 2);
+      const mm = clean.slice(2, 4);
+      const yyyy = clean.slice(4, 8);
+      return `${yyyy}-${mm}-${dd}`; // YYYY-MM-DD for internal use
+    }
+    return null;
+  }
+
+  function isValidFutureDate(yyyy_mm_dd) {
+    const today = todayStr();
+    const max = todayStr(30);
+    return yyyy_mm_dd >= today && yyyy_mm_dd <= max;
+  }
+
+  function formatDisplay(yyyy_mm_dd) {
+    if (!yyyy_mm_dd) return "";
+    const [y, m, d] = yyyy_mm_dd.split("-");
+    return `${d}/${m}/${y}`;
+  }
+
+  displayInput.addEventListener("input", e => {
+    let val = e.target.value.replace(/\D/g, "");
+    // Auto-insert slashes
+    if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2);
+    if (val.length > 5) val = val.slice(0, 5) + "/" + val.slice(5);
+    if (val.length > 10) val = val.slice(0, 10);
+    displayInput.value = val;
+
+    const isoDate = parseDisplayDate(val.replace(/\//g, ""));
+    if (isoDate && isValidFutureDate(isoDate)) {
+      hiddenInput.value = isoDate;
+      wiz.date = isoDate;
+      wiz.time = null;
+      displayInput.style.borderColor = "";
+      loadSlots();
+    } else if (val.length === 10) {
+      displayInput.style.borderColor = "var(--pink)";
+      hiddenInput.value = "";
+      wiz.date = null;
+      $("#slots").innerHTML = `<p style="color:var(--pink)">Please enter a valid future date (today to 30 days ahead).</p>`;
+    }
+  });
+
   w.addEventListener("click", e => {
     const svc = e.target.closest("[data-svc]");
     if (svc) { wiz.service = svc.dataset.svc; renderStep1(); }
@@ -214,7 +266,7 @@ function bindWizard() {
       slot.classList.add("sel");
     }
   });
-  $("#book-date").addEventListener("change", e => { wiz.date = e.target.value; wiz.time = null; loadSlots(); });
+
   $("#wiz-back").addEventListener("click", () => { if (wiz.step > 1) { wiz.step--; renderStep(); } });
   $("#wiz-next").addEventListener("click", async () => {
     if (wizValidate() !== true) return;
@@ -311,13 +363,14 @@ async function loadAdmin() {
   ].map(([l, v]) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
   const svcName = id => (adminServiceCatalog.find(s => s.id === id) || {}).name || id;
   const styName = id => (CFG.stylists.find(s => s.id === id) || {}).name || id;
+  const fmtDate = iso => { if (!iso) return ""; const [y,m,d] = iso.split("-"); return `${d}/${m}/${y}`; };
   $("#bk-list").innerHTML = bookings.length ? [...bookings].reverse().map(b => `
     <div class="bk-row s-${b.status}">
       <div class="top">
         <b>${(b.name || "").replace(/[<>&]/g, "")}</b>
         <span class="st ${b.status}">${b.status}</span>
       </div>
-      <small>${svcName(b.service_id)} · ${b.date} ${b.time}</small>
+      <small>${svcName(b.service_id)} · ${fmtDate(b.date)} ${b.time}</small>
       <small>Ph: ${(b.phone || "").replace(/[<>&]/g, "")}${b.notes ? " · Note: " + b.notes.replace(/[<>&]/g, "") : ""}</small>
       <div class="bk-actions">
         <button data-act="confirmed" data-id="${b.id}">Confirm</button>
