@@ -457,6 +457,14 @@ header.hero .shade::after {
   font-size: 2.2rem; margin-bottom: 4px;
   filter: drop-shadow(0 2px 6px rgba(201,146,42,.4));
 }
+.card-img {
+  width: calc(100% + 40px);
+  margin: -22px -20px 14px -20px;
+  display: block;
+  height: 160px;
+  object-fit: cover;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
 .card h3 { margin: 10px 0 6px; font-size: 1.1rem; color: var(--maroon) }
 .card p  { color: var(--muted); font-size: .88rem; margin-bottom: 16px; line-height: 1.55 }
 .card .row {

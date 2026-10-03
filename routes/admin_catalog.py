@@ -30,6 +30,49 @@ def service_payload(data):
     return {"name": name, "desc": description, "icon": icon, "price": price, "mins": minutes}, None
 
 
+def _upload_product_image(upload, service):
+    """Upload a product image (Cloudinary → Firebase → local disk) and add image_url to service dict."""
+    signatures = {
+        ".jpg":  lambda c: c.startswith(b"\xff\xd8\xff"),
+        ".jpeg": lambda c: c.startswith(b"\xff\xd8\xff"),
+        ".png":  lambda c: c.startswith(b"\x89PNG\r\n\x1a\n"),
+        ".webp": lambda c: c.startswith(b"RIFF") and c[8:12] == b"WEBP",
+    }
+    extension = Path(secure_filename(upload.filename or "")).suffix.lower()
+    if extension not in signatures:
+        return "Product image must be a JPG, PNG, or WebP file."
+    header = upload.stream.read(16); upload.stream.seek(0)
+    if not signatures[extension](header):
+        return "Uploaded file does not match its declared image type."
+
+    photo_id = uuid.uuid4().hex[:12]
+    if db.cloudinary_on():
+        try:
+            public_id = f"gayathri-pooja-store/products/{photo_id}"
+            service["image_url"] = db.upload_cloudinary_image(upload.stream, public_id, upload.mimetype)
+            service["image_cloudinary_id"] = public_id
+        except Exception as e:
+            return f"Image upload failed: {e}"
+    elif db.firebase_storage_on():
+        try:
+            storage_path = f"products/{photo_id}{extension}"
+            service["image_url"] = db.upload_gallery_image(upload.stream, storage_path, upload.mimetype)
+            service["image_storage_path"] = storage_path
+        except Exception:
+            stored_name = f"uploads/product_{photo_id}{extension}"
+            target = Path(current_app.static_folder) / "images" / stored_name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            upload.stream.seek(0); upload.save(target)
+            service["image_url"] = url_for("static", filename=f"images/{stored_name}")
+    else:
+        stored_name = f"uploads/product_{photo_id}{extension}"
+        target = Path(current_app.static_folder) / "images" / stored_name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        upload.stream.seek(0); upload.save(target)
+        service["image_url"] = url_for("static", filename=f"images/{stored_name}")
+    return None  # no error
+
+
 def settings_payload(data):
     salon = str(data.get("salon", "")).strip()[:80]
     maps_query = str(data.get("maps_query", "")).strip()[:180]
@@ -127,9 +170,16 @@ def admin_settings():
 def admin_services():
     if request.method == "GET":
         return jsonify({"services": db.list_services()})
-    service, error = service_payload(request.get_json(force=True))
+    # Accept multipart/form-data (with optional image) or application/json (text-only)
+    data = request.form if request.form else request.get_json(force=True)
+    service, error = service_payload(data)
     if error:
         return jsonify({"error": error}), 400
+    upload = request.files.get("image")
+    if upload and upload.filename:
+        err = _upload_product_image(upload, service)
+        if err:
+            return jsonify({"error": err}), 400
     return jsonify({"service": db.save_service(service)}), 201
 
 
@@ -138,11 +188,26 @@ def admin_services():
 def admin_service(service_id):
     if request.method == "DELETE":
         return jsonify({"ok": db.delete_service(service_id)})
-    service, error = service_payload(request.get_json(force=True))
+    data = request.form if request.form else request.get_json(force=True)
+    service, error = service_payload(data)
     if error:
         return jsonify({"error": error}), 400
-    if service_id not in {item["id"] for item in db.list_services()}:
-        return jsonify({"error": "Service not found."}), 404
+    existing_list = db.list_services()
+    existing = next((s for s in existing_list if s["id"] == service_id), None)
+    if not existing:
+        return jsonify({"error": "Product not found."}), 404
+    # Carry over existing image if no new one is uploaded
+    if existing.get("image_url") and not (request.files.get("image") and request.files["image"].filename):
+        service["image_url"] = existing["image_url"]
+        if existing.get("image_cloudinary_id"):
+            service["image_cloudinary_id"] = existing["image_cloudinary_id"]
+        if existing.get("image_storage_path"):
+            service["image_storage_path"] = existing["image_storage_path"]
+    upload = request.files.get("image")
+    if upload and upload.filename:
+        err = _upload_product_image(upload, service)
+        if err:
+            return jsonify({"error": err}), 400
     return jsonify({"service": db.save_service(service, service_id)})
 
 

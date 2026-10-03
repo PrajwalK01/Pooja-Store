@@ -64,7 +64,9 @@ $$("#mobile-menu a").forEach(a => a.addEventListener("click", () => $("#mobile-m
   }
   grid.innerHTML = CFG.services.map(s => `
     <div class="card fade-in">
-      <div class="icon">${escapeHTML(s.icon)}</div>
+      ${s.image_url
+        ? `<img src="${escapeHTML(s.image_url)}" alt="${escapeHTML(s.name)}" class="card-img" loading="lazy">`
+        : `<div class="icon">${escapeHTML(s.icon)}</div>`}
       <h3>${escapeHTML(s.name)}</h3>
       <p>${escapeHTML(s.desc)}</p>
       <div class="row">
@@ -95,14 +97,14 @@ $$("#mobile-menu a").forEach(a => a.addEventListener("click", () => $("#mobile-m
 
 /* ═══════════════════════════════════════════════
    ORDER WIZARD — 3 steps:
-   Step 1: Select items (multi-select checklist)
+   Step 1: Select items (multi-select with quantity)
    Step 2: Pick date & time
    Step 3: Your details + confirm
 ═══════════════════════════════════════════════ */
 const wiz = {
   step: 1,
-  /* Multi-select: Set of selected service IDs */
-  selectedIds: new Set(),
+  /* Map of service_id → quantity (1+) */
+  selectedItems: new Map(),
   stylist: null,
   date: null,
   time: null,
@@ -121,7 +123,7 @@ function stepTitle() {
   }[wiz.step];
 }
 
-/* ── Render step 1: multi-select product checklist ── */
+/* ── Render step 1: multi-select product list with quantity controls ── */
 function renderStep1() {
   const container = $("#step-1-opts");
   if (!container) return;
@@ -129,12 +131,27 @@ function renderStep1() {
     container.innerHTML = `<p class="empty-state">No products available to order right now. Please check back soon.</p>`;
     return;
   }
-  container.innerHTML = CFG.services.map(s => `
-    <button class="opt ${wiz.selectedIds.has(s.id) ? "sel" : ""}" data-svc="${escapeHTML(s.id)}" type="button">
-      <span class="em">${escapeHTML(s.icon)}</span>
-      <span><b>${escapeHTML(s.name)}</b><small>${escapeHTML(s.desc)}</small></span>
-      <span class="p">${money(s.price)}</span>
-    </button>`).join("");
+  container.innerHTML = CFG.services.map(s => {
+    const qty = wiz.selectedItems.get(s.id) || 0;
+    const selected = qty > 0;
+    return `
+    <div class="opt ${selected ? "sel" : ""}" data-svc="${escapeHTML(s.id)}">
+      ${s.image_url
+        ? `<img src="${escapeHTML(s.image_url)}" alt="${escapeHTML(s.name)}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0">`
+        : `<span class="em">${escapeHTML(s.icon)}</span>`}
+      <span style="flex:1;min-width:0"><b>${escapeHTML(s.name)}</b><small>${escapeHTML(s.desc)}</small></span>
+      <span class="p" style="margin-right:10px">${money(s.price)}</span>
+      <div class="qty-ctrl" style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <button class="qty-btn qty-dec" data-id="${escapeHTML(s.id)}" type="button"
+                style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--gold);background:var(--bg);color:var(--maroon);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700"
+                ${qty === 0 ? "disabled" : ""}>−</button>
+        <span class="qty-num" data-id="${escapeHTML(s.id)}"
+              style="min-width:20px;text-align:center;font-family:var(--font-display);font-weight:700;color:var(--maroon);font-size:1rem">${qty || 0}</span>
+        <button class="qty-btn qty-inc" data-id="${escapeHTML(s.id)}" type="button"
+                style="width:28px;height:28px;border-radius:50%;border:1.5px solid var(--gold);background:var(--maroon);color:var(--gold-light);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700">+</button>
+      </div>
+    </div>`;
+  }).join("");
   updateSelectionSummary();
 }
 
@@ -142,16 +159,17 @@ function updateSelectionSummary() {
   const summary = $("#selection-summary");
   const namesEl = $("#selected-names");
   if (!summary || !namesEl) return;
-  if (wiz.selectedIds.size === 0) {
+  if (wiz.selectedItems.size === 0) {
     summary.classList.remove("visible");
     return;
   }
-  const names = [...wiz.selectedIds]
-    .map(id => CFG.services.find(s => s.id === id))
-    .filter(Boolean)
-    .map(s => `${s.icon} ${s.name}`)
-    .join(", ");
-  namesEl.textContent = names;
+  const parts = [...wiz.selectedItems.entries()]
+    .map(([id, qty]) => {
+      const s = CFG.services.find(x => x.id === id);
+      return s ? `${s.icon} ${s.name} ×${qty}` : null;
+    })
+    .filter(Boolean);
+  namesEl.textContent = parts.join("  ·  ");
   summary.classList.add("visible");
 }
 
@@ -214,14 +232,19 @@ async function loadSlots() {
 }
 
 function renderSummary() {
-  const items = [...wiz.selectedIds]
-    .map(id => CFG.services.find(s => s.id === id))
-    .filter(Boolean);
+  const items = [...wiz.selectedItems.entries()]
+    .map(([id, qty]) => ({ s: CFG.services.find(x => x.id === id), qty }))
+    .filter(x => x.s);
   const [y, m, d] = wiz.date.split("-");
   const displayDate = `${d}/${m}/${y}`;
-  const total = items.reduce((sum, s) => sum + Number(s.price), 0);
-  const itemsHtml = items.map(s =>
-    `<div class="summary-item"><span>${escapeHTML(s.icon)}</span><span>${escapeHTML(s.name)}</span><span style="margin-left:auto;color:var(--maroon);font-weight:700">${money(s.price)}</span></div>`
+  const total = items.reduce((sum, { s, qty }) => sum + Number(s.price) * qty, 0);
+  const itemsHtml = items.map(({ s, qty }) =>
+    `<div class="summary-item">
+       <span>${escapeHTML(s.icon)}</span>
+       <span>${escapeHTML(s.name)}</span>
+       <span style="color:var(--muted);font-size:.82rem">×${qty}</span>
+       <span style="margin-left:auto;color:var(--maroon);font-weight:700">${money(Number(s.price) * qty)}</span>
+     </div>`
   ).join("");
   $("#summary").innerHTML =
     `${itemsHtml}
@@ -229,8 +252,8 @@ function renderSummary() {
        <b>Date:</b> ${displayDate} at <b>${to12hr(wiz.time)}</b>
      </div>
      <div style="margin-top:6px;font-size:.82rem;color:var(--muted)">
-       ${items.length} item${items.length > 1 ? "s" : ""} &nbsp;·&nbsp;
-       Total: <strong style="color:var(--maroon)">${money(total)}</strong>
+       ${items.length} item${items.length > 1 ? "s" : ""}
+       &nbsp;·&nbsp; Total: <strong style="color:var(--maroon)">${money(total)}</strong>
      </div>`;
 }
 
@@ -249,7 +272,7 @@ function renderStep() {
 }
 
 function wizValidate() {
-  if (wiz.step === 1 && wiz.selectedIds.size === 0) {
+  if (wiz.step === 1 && wiz.selectedItems.size === 0) {
     toast("Please select at least one item.", true); return false;
   }
   if (wiz.step === 2 && (!wiz.date || !wiz.time)) {
@@ -258,7 +281,7 @@ function wizValidate() {
   if (wiz.step === 3) {
     const name  = $("#f-name")?.value.trim();
     const phone = $("#f-phone")?.value.trim();
-    if (!name || name.length < 2)  { toast("Please enter your name.", true);         return false; }
+    if (!name || name.length < 2)  { toast("Please enter your name.", true);          return false; }
     if (!phone || phone.length < 7){ toast("Please enter a valid phone number.", true); return false; }
   }
   return true;
@@ -270,29 +293,33 @@ async function submitOrder() {
   btn.textContent = "Placing order…";
 
   try {
-    /* Build comma-separated service_ids for the first field (backward-compat)
-       and full array in service_ids (new backend field) */
-    const ids   = [...wiz.selectedIds];
-    const names = ids.map(id => (CFG.services.find(s => s.id === id) || {}).name || id).join(", ");
+    const entries = [...wiz.selectedItems.entries()];
+    const ids   = entries.map(([id]) => id);
+    const itemsStr = entries
+      .map(([id, qty]) => {
+        const s = CFG.services.find(x => x.id === id);
+        return s ? `${s.icon} ${s.name} ×${qty}` : id;
+      })
+      .join(", ");
 
     const r = await fetch("/api/bookings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name:       $("#f-name").value.trim(),
-        phone:      $("#f-phone").value.trim(),
-        service_id: ids[0],          /* first item — keeps backend validation happy */
-        service_ids: ids,            /* full list — new field */
-        stylist_id: wiz.stylist,
-        date:       wiz.date,
-        time:       wiz.time,
-        notes:      ($("#f-notes").value.trim() || "") + (ids.length > 1 ? ` | Items: ${names}` : ""),
+        name:        $("#f-name").value.trim(),
+        phone:       $("#f-phone").value.trim(),
+        service_id:  ids[0],
+        service_ids: ids,
+        stylist_id:  wiz.stylist,
+        date:        wiz.date,
+        time:        wiz.time,
+        notes:       ($("#f-notes").value.trim() || "") + ` | Items: ${itemsStr}`,
       }),
     });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error || "Order could not be placed.");
     toast(`🙏 Order confirmed! Your Order ID: ${data.id}. We will contact you soon.`);
-    wiz.selectedIds.clear();
+    wiz.selectedItems.clear();
     wiz.date = wiz.time = null;
     autoSetStylist();
     if ($("#f-name"))   $("#f-name").value   = "";
@@ -316,7 +343,7 @@ function bindWizard() {
   /* Pre-select service from URL param */
   const requestedService = new URLSearchParams(window.location.search).get("service");
   if (requestedService && CFG.services.some(s => s.id === requestedService)) {
-    wiz.selectedIds.add(requestedService);
+    wiz.selectedItems.set(requestedService, 1);
   }
 
   renderStep1();
@@ -358,16 +385,24 @@ function bindWizard() {
     }
   });
 
-  /* Click handlers for step 1 (item select) and step 2 (slot select) */
+  /* Click handlers for step 1 (qty +/-) and step 2 (slot select) */
   w.addEventListener("click", e => {
-    /* Toggle item selection */
-    const svc = e.target.closest("[data-svc]");
-    if (svc) {
-      const id = svc.dataset.svc;
-      if (wiz.selectedIds.has(id)) wiz.selectedIds.delete(id);
-      else wiz.selectedIds.add(id);
-      svc.classList.toggle("sel", wiz.selectedIds.has(id));
-      updateSelectionSummary();
+    /* Quantity increment */
+    const inc = e.target.closest(".qty-inc");
+    if (inc) {
+      const id  = inc.dataset.id;
+      const cur = wiz.selectedItems.get(id) || 0;
+      wiz.selectedItems.set(id, cur + 1);
+      renderStep1(); return;
+    }
+    /* Quantity decrement */
+    const dec = e.target.closest(".qty-dec");
+    if (dec) {
+      const id  = dec.dataset.id;
+      const cur = wiz.selectedItems.get(id) || 0;
+      if (cur <= 1) wiz.selectedItems.delete(id);
+      else wiz.selectedItems.set(id, cur - 1);
+      renderStep1(); return;
     }
     /* Slot selection */
     const slot = e.target.closest(".slot");
@@ -397,7 +432,7 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-book]");
   if (!b) return;
   const id = b.dataset.book;
-  wiz.selectedIds.add(id);
+  wiz.selectedItems.set(id, (wiz.selectedItems.get(id) || 0) + 1);
   wiz.step = 2;
   if (!$("#wizard")) {
     window.location.href = `/booking?service=${encodeURIComponent(id)}`;
@@ -475,7 +510,11 @@ bindReviews();
    ADMIN
 ═══════════════════════════════════════════════ */
 async function adminFetch(url, opts = {}) {
-  opts.headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
+  /* If body is FormData let the browser set Content-Type (multipart boundary).
+     For everything else default to JSON. */
+  if (!(opts.body instanceof FormData)) {
+    opts.headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
+  }
   return fetch(url, opts);
 }
 
@@ -556,7 +595,9 @@ async function loadAdminProducts() {
     ? services.map(s => `
       <article class="managed-row">
         <div>
-          <span class="managed-icon">${escapeHTML(s.icon)}</span>
+          ${s.image_url
+            ? `<img src="${escapeHTML(s.image_url)}" alt="${escapeHTML(s.name)}" style="width:52px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--border);flex-shrink:0">`
+            : `<span class="managed-icon">${escapeHTML(s.icon)}</span>`}
           <div><b>${escapeHTML(s.name)}</b><small>${escapeHTML(s.desc)}</small></div>
         </div>
         <p><strong>${money(s.price)}</strong></p>
@@ -647,10 +688,14 @@ function resetProductForm() {
   const form = $("#service-form");
   if (!form) return;
   form.reset();
-  $("#service-id").value  = "";
+  $("#service-id").value   = "";
   $("#service-icon").value = "🪔";
-  /* Keep duration hidden at 0 */
   if ($("#service-minutes")) $("#service-minutes").value = "0";
+  if ($("#service-image"))   $("#service-image").value   = "";
+  const wrap = $("#service-image-preview-wrap");
+  const prev = $("#service-image-preview");
+  if (wrap) wrap.style.display = "none";
+  if (prev) prev.src = "";
   $("#service-submit").textContent = "Add Product";
   $("#service-cancel").hidden = true;
 }
@@ -739,24 +784,23 @@ async function bindAdmin() {
     } catch (error) { toast(error.message, true); }
   }));
 
-  /* ── Product form submit (add / edit) ── */
+  /* ── Product form submit (add / edit) — uses FormData for optional image ── */
   const serviceForm = $("#service-form");
   serviceForm?.addEventListener("submit", async event => {
     event.preventDefault();
     const serviceId = $("#service-id").value;
-    /* Always send mins=0 silently */
+    const fd = new FormData();
+    fd.append("name",  $("#service-name").value);
+    fd.append("desc",  $("#service-description").value);
+    fd.append("price", $("#service-price").value);
+    fd.append("mins",  "10");
+    fd.append("icon",  $("#service-icon").value);
+    const imgFile = $("#service-image")?.files[0];
+    if (imgFile) fd.append("image", imgFile);
+
     const r = await adminFetch(
       serviceId ? `/api/admin/services/${serviceId}` : "/api/admin/services",
-      {
-        method: serviceId ? "PUT" : "POST",
-        body: JSON.stringify({
-          name:  $("#service-name").value,
-          desc:  $("#service-description").value,
-          price: $("#service-price").value,
-          mins:  10,   /* minimum accepted by backend validation (10-600) */
-          icon:  $("#service-icon").value,
-        }),
-      }
+      { method: serviceId ? "PUT" : "POST", body: fd }
     );
     const result = await r.json();
     if (!r.ok) return toast(result.error || "Product could not be saved.", true);
@@ -780,9 +824,17 @@ async function bindAdmin() {
       $("#service-price").value       = s.price;
       if ($("#service-minutes")) $("#service-minutes").value = s.mins || 10;
       $("#service-icon").value        = s.icon;
+      /* Show existing image preview */
+      const wrap = $("#service-image-preview-wrap");
+      const prev = $("#service-image-preview");
+      if (wrap && prev && s.image_url) {
+        prev.src = s.image_url;
+        wrap.style.display = "block";
+      } else if (wrap) {
+        wrap.style.display = "none";
+      }
       $("#service-submit").textContent = "Save Changes";
       $("#service-cancel").hidden = false;
-      /* Scroll to form */
       serviceForm?.scrollIntoView({ behavior: "smooth", block: "start" });
     } else if (remove && confirm("Delete this product?")) {
       const r = await adminFetch(`/api/admin/services/${remove.dataset.serviceDelete}`, { method: "DELETE" });

@@ -49,7 +49,7 @@
   <!-- ── Products panel ── -->
   <section class="admin-panel" id="services-panel" role="tabpanel" hidden>
     <h2 class="admin-section-title">Manage Products</h2>
-    <form id="service-form" class="admin-editor">
+    <form id="service-form" class="admin-editor" enctype="multipart/form-data">
       <input type="hidden" id="service-id">
       <div class="field">
         <label for="service-name">Product Name</label>
@@ -64,11 +64,20 @@
           <label for="service-price">Price (<span id="admin-currency">{{ cfg.currency }}</span>)</label>
           <input id="service-price" type="number" min="1" max="1000000" required placeholder="e.g. 150">
         </div>
-        <!-- Duration hidden — backend still saves it silently as 0 -->
+        <!-- Duration hidden — backend still saves it silently -->
         <input type="hidden" id="service-minutes" value="0">
         <div class="field">
           <label for="service-icon">Icon / Emoji</label>
           <input id="service-icon" maxlength="8" value="🪔" required placeholder="🪔">
+        </div>
+      </div>
+      <div class="field">
+        <label for="service-image">Product Image (optional · JPG / PNG / WebP)</label>
+        <input id="service-image" name="image" type="file" accept=".jpg,.jpeg,.png,.webp">
+        <div id="service-image-preview-wrap" style="display:none;margin-top:10px">
+          <img id="service-image-preview" src="" alt="Current product image"
+               style="max-height:100px;border-radius:6px;border:1px solid var(--border);object-fit:cover">
+          <p class="admin-help" style="margin-top:4px">Current image — upload a new file to replace it.</p>
         </div>
       </div>
       <div class="admin-form-actions">
@@ -100,15 +109,8 @@
         <input id="settings-whatsapp" inputmode="numeric" placeholder="919108622221" maxlength="15">
       </div>
 
-      <div class="settings-group">
-        <h3>Order Capacity</h3>
-        <div class="admin-editor-row">
-          <div class="field">
-            <label for="settings-max-per-slot">Max orders per 30-min slot</label>
-            <input id="settings-max-per-slot" type="number" min="1" max="50" value="1" required>
-          </div>
-        </div>
-      </div>
+      <!-- Order capacity hidden — not needed in Pooja Store UI -->
+      <input type="hidden" id="settings-max-per-slot" value="10">
 
       <div class="settings-group">
         <h3>Lunch / Break Time</h3>
