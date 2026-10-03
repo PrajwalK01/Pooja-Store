@@ -13,6 +13,11 @@ MAPS_QUERY                = os.getenv("MAPS_QUERY", "").strip()
 SALON_NAME                = os.getenv("SALON_NAME", "").strip()
 CURRENCY_SYMBOL           = os.getenv("CURRENCY_SYMBOL", "").strip()
 
+# Cloudinary
+CLOUDINARY_CLOUD_NAME     = os.getenv("CLOUDINARY_CLOUD_NAME", "").strip()
+CLOUDINARY_API_KEY        = os.getenv("CLOUDINARY_API_KEY", "").strip()
+CLOUDINARY_API_SECRET     = os.getenv("CLOUDINARY_API_SECRET", "").strip()
+
 
 def public_cfg():
     return {

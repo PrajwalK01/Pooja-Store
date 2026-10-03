@@ -145,27 +145,39 @@ def admin_gallery():
     if not signatures[extension](header):
         return jsonify({"error": "The uploaded file does not match its image type."}), 400
 
-    stored_name = f"uploads/{uuid.uuid4().hex}{extension}"
-    target = Path(current_app.static_folder) / "images" / stored_name
-    photo_data = {"filename": stored_name, "title": title, "stylist": stylist}
-    if db.firebase_on():
-        if not db.firebase_storage_on():
-            return jsonify({"error": "Set FIREBASE_STORAGE_BUCKET before uploading gallery photos in Firebase mode."}), 503
+    photo_id = uuid.uuid4().hex[:12]
+    photo_data = {"filename": f"uploads/{photo_id}{extension}", "title": title, "stylist": stylist}
+
+    # Priority: Cloudinary → Firebase Storage → local disk
+    if db.cloudinary_on():
         try:
-            photo_data["storage_path"] = f"gallery/{uuid.uuid4().hex}{extension}"
+            public_id = f"7-star-salon/{photo_id}"
+            photo_data["src"] = db.upload_cloudinary_image(upload.stream, public_id, upload.mimetype)
+            photo_data["cloudinary_id"] = public_id
+        except Exception as e:
+            return jsonify({"error": f"Cloudinary upload failed: {str(e)}"}), 502
+    elif db.firebase_storage_on():
+        try:
+            photo_data["storage_path"] = f"gallery/{photo_id}{extension}"
             photo_data["src"] = db.upload_gallery_image(upload.stream, photo_data["storage_path"], upload.mimetype)
-        except Exception:
-            return jsonify({"error": "The image could not be saved to Firebase Storage."}), 502
+        except Exception as e:
+            return jsonify({"error": f"Firebase Storage error: {str(e)}"}), 502
     else:
+        # local disk fallback
+        stored_name = f"uploads/{photo_id}{extension}"
+        target = Path(current_app.static_folder) / "images" / stored_name
         target.parent.mkdir(parents=True, exist_ok=True)
+        upload.stream.seek(0)
         upload.save(target)
+
     try:
         photo = db.add_gallery_photo(photo_data)
     except Exception:
-        if photo_data.get("storage_path"):
+        # rollback
+        if photo_data.get("cloudinary_id"):
+            db.delete_cloudinary_image(photo_data["cloudinary_id"])
+        elif photo_data.get("storage_path"):
             db.delete_gallery_image(photo_data["storage_path"])
-        else:
-            target.unlink(missing_ok=True)
         raise
     return jsonify({"photo": photo}), 201
 
@@ -176,11 +188,16 @@ def admin_delete_gallery_photo(photo_id):
     photo = db.delete_gallery_photo(photo_id)
     if not photo:
         return jsonify({"error": "Photo not found."}), 404
-    if photo.get("storage_path"):
+    # Delete from Cloudinary
+    if photo.get("cloudinary_id"):
+        db.delete_cloudinary_image(photo["cloudinary_id"])
+    # Delete from Firebase Storage
+    elif photo.get("storage_path"):
         try:
             db.delete_gallery_image(photo["storage_path"])
         except Exception:
-            return jsonify({"error": "Photo record removed, but its Storage object could not be deleted."}), 502
+            return jsonify({"error": "Photo record removed, but Storage object could not be deleted."}), 502
+    # Delete from local disk
     elif str(photo.get("filename", "")).startswith("uploads/"):
         target = (Path(current_app.static_folder) / "images" / photo["filename"]).resolve()
         upload_dir = (Path(current_app.static_folder) / "images" / "uploads").resolve()

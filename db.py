@@ -8,7 +8,9 @@ from datetime import datetime
 from urllib.parse import quote
 import os as _os
 
-from config import FIREBASE_CREDENTIALS, FIREBASE_CREDENTIALS_JSON, FIREBASE_STORAGE_BUCKET, public_cfg
+from config import (FIREBASE_CREDENTIALS, FIREBASE_CREDENTIALS_JSON,
+                    FIREBASE_STORAGE_BUCKET, public_cfg,
+                    CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET)
 
 _lock = threading.Lock()
 _firestore = None
@@ -82,6 +84,48 @@ def delete_gallery_image(object_name):
         return False
     _storage_bucket.blob(object_name).delete()
     return True
+
+
+# ---------- Cloudinary ----------
+
+def cloudinary_on():
+    return bool(CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET)
+
+
+def upload_cloudinary_image(stream, public_id, content_type):
+    """Upload image to Cloudinary and return the secure URL."""
+    import cloudinary
+    import cloudinary.uploader
+    cloudinary.config(
+        cloud_name=CLOUDINARY_CLOUD_NAME,
+        api_key=CLOUDINARY_API_KEY,
+        api_secret=CLOUDINARY_API_SECRET,
+    )
+    stream.seek(0)
+    result = cloudinary.uploader.upload(
+        stream,
+        public_id=public_id,
+        folder="7-star-salon",
+        overwrite=True,
+        resource_type="image",
+    )
+    return result["secure_url"]
+
+
+def delete_cloudinary_image(public_id):
+    """Delete image from Cloudinary."""
+    try:
+        import cloudinary
+        import cloudinary.uploader
+        cloudinary.config(
+            cloud_name=CLOUDINARY_CLOUD_NAME,
+            api_key=CLOUDINARY_API_KEY,
+            api_secret=CLOUDINARY_API_SECRET,
+        )
+        cloudinary.uploader.destroy(public_id)
+        return True
+    except Exception:
+        return False
 
 
 def _col(name):
