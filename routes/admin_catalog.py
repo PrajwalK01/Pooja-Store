@@ -30,8 +30,18 @@ def service_payload(data):
     return {"name": name, "desc": description, "icon": icon, "price": price, "mins": minutes}, None
 
 
+_MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB hard limit for uploaded images
+
+
 def _upload_product_image(upload, service):
     """Upload a product image (Cloudinary → Firebase → local disk) and add image_url to service dict."""
+    # Explicit file-size check (belt-and-suspenders alongside MAX_CONTENT_LENGTH)
+    upload.stream.seek(0, 2)  # seek to end
+    file_size = upload.stream.tell()
+    upload.stream.seek(0)
+    if file_size > _MAX_UPLOAD_BYTES:
+        return "Product image must be smaller than 5 MB."
+
     signatures = {
         ".jpg":  lambda c: c.startswith(b"\xff\xd8\xff"),
         ".jpeg": lambda c: c.startswith(b"\xff\xd8\xff"),
@@ -60,13 +70,19 @@ def _upload_product_image(upload, service):
             service["image_storage_path"] = storage_path
         except Exception:
             stored_name = f"uploads/product_{photo_id}{extension}"
-            target = Path(current_app.static_folder) / "images" / stored_name
+            upload_dir = (Path(current_app.static_folder) / "images" / "uploads").resolve()
+            target = (Path(current_app.static_folder) / "images" / stored_name).resolve()
+            if target.parent != upload_dir:
+                return "Invalid upload path."
             target.parent.mkdir(parents=True, exist_ok=True)
             upload.stream.seek(0); upload.save(target)
             service["image_url"] = url_for("static", filename=f"images/{stored_name}")
     else:
         stored_name = f"uploads/product_{photo_id}{extension}"
-        target = Path(current_app.static_folder) / "images" / stored_name
+        upload_dir = (Path(current_app.static_folder) / "images" / "uploads").resolve()
+        target = (Path(current_app.static_folder) / "images" / stored_name).resolve()
+        if target.parent != upload_dir:
+            return "Invalid upload path."
         target.parent.mkdir(parents=True, exist_ok=True)
         upload.stream.seek(0); upload.save(target)
         service["image_url"] = url_for("static", filename=f"images/{stored_name}")

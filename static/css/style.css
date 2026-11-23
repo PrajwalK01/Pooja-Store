@@ -425,6 +425,13 @@ header.hero .shade::after {
 .cards {
   display: grid; grid-template-columns: 1fr; gap: 18px;
 }
+/* Responsive cards: 2 col at 640px+, 3 col at 900px+ */
+@media (min-width: 640px) {
+  .cards { grid-template-columns: repeat(2, 1fr) }
+}
+@media (min-width: 900px) {
+  .cards { grid-template-columns: repeat(3, 1fr) }
+}
 .card {
   background: var(--panel);
   border: 1px solid var(--border);
@@ -464,6 +471,28 @@ header.hero .shade::after {
   height: 160px;
   object-fit: cover;
   border-radius: var(--radius) var(--radius) 0 0;
+  background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
+}
+/* Fallback icon shown when no image (via JS-generated .card-img-fallback) */
+.card-img-fallback {
+  width: calc(100% + 40px);
+  margin: -22px -20px 14px -20px;
+  height: 120px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--bg2) 0%, var(--bg) 100%);
+  border-radius: var(--radius) var(--radius) 0 0;
+  font-size: 3rem;
+  border-bottom: 1px solid var(--border);
+}
+/* Featured badge */
+.card-featured-badge {
+  position: absolute; top: 10px; right: 10px; z-index: 4;
+  background: var(--gold-grad); color: var(--maroon);
+  font-family: var(--font-display); font-size: .6rem;
+  font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+  padding: 4px 10px; border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(201,146,42,.4);
+  pointer-events: none;
 }
 .card h3 { margin: 10px 0 6px; font-size: 1.1rem; color: var(--maroon) }
 .card p  { color: var(--muted); font-size: .88rem; margin-bottom: 16px; line-height: 1.55 }
@@ -908,12 +937,17 @@ footer::before {
 .mode-chip.live { border-color: #27ae60; color: #27ae60 }
 
 /* ── Fade-in on scroll ── */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(28px) }
+  to   { opacity: 1; transform: translateY(0) }
+}
 .fade-in {
   opacity: 0; transform: translateY(22px);
   transition: opacity .6s ease, transform .6s ease;
 }
 .fade-in.visible {
   opacity: 1; transform: translateY(0);
+  animation: fadeSlideUp .65s cubic-bezier(.22,1,.36,1) both;
 }
 
 /* ══════════════════════════════════════

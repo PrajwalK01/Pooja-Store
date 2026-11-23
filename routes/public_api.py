@@ -1,10 +1,66 @@
 """Public booking availability, booking creation, and review endpoints."""
+import re
+import threading
+import time
+from collections import defaultdict
+
 from flask import Blueprint, jsonify, request
 
 import db
 
 public_api_bp = Blueprint("public_api", __name__)
 
+# ---------------------------------------------------------------------------
+# Simple in-memory rate limiter
+# ---------------------------------------------------------------------------
+_rate_lock = threading.Lock()
+_rate_store: dict[str, list[float]] = defaultdict(list)
+
+_LIMITS: dict[str, tuple[int, int]] = {
+    "/api/bookings": (10, 60),   # 10 requests per 60 s
+    "/api/reviews":  (10, 60),
+    "/api/admin/login": (3, 60), # shared with admin_auth
+}
+
+
+def _check_rate(endpoint: str, ip: str) -> bool:
+    """Return True if the request is allowed, False if rate-limited."""
+    max_calls, window = _LIMITS.get(endpoint, (30, 60))
+    now = time.monotonic()
+    key = f"{endpoint}:{ip}"
+    with _rate_lock:
+        timestamps = _rate_store[key]
+        # Purge expired entries
+        cutoff = now - window
+        timestamps[:] = [t for t in timestamps if t > cutoff]
+        if len(timestamps) >= max_calls:
+            return False
+        timestamps.append(now)
+    return True
+
+
+def _strip_html(text: str) -> str:
+    """Remove HTML/XML tags and normalise whitespace."""
+    cleaned = re.sub(r"<[^>]+>", "", text)
+    return cleaned.strip()
+
+
+# ---------------------------------------------------------------------------
+# After-request: add security headers to every response from this blueprint
+# ---------------------------------------------------------------------------
+@public_api_bp.after_request
+def add_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; script-src 'self'; object-src 'none';"
+    )
+    return response
+
+
+# ---------------------------------------------------------------------------
+# Endpoints
+# ---------------------------------------------------------------------------
 
 @public_api_bp.get("/api/availability")
 def availability():
@@ -17,6 +73,10 @@ def availability():
 
 @public_api_bp.post("/api/bookings")
 def create_booking():
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "").split(",")[0].strip()
+    if not _check_rate("/api/bookings", ip):
+        return jsonify({"error": "Too many requests. Please wait a moment and try again."}), 429
+
     data = request.get_json(force=True)
     for field in ("name", "phone", "service_id", "stylist_id", "date", "time"):
         if not str(data.get(field, "")).strip():
@@ -56,10 +116,14 @@ def create_booking():
 @public_api_bp.route("/api/reviews", methods=["GET", "POST"])
 def reviews():
     if request.method == "POST":
+        ip = request.headers.get("X-Forwarded-For", request.remote_addr or "").split(",")[0].strip()
+        if not _check_rate("/api/reviews", ip):
+            return jsonify({"error": "Too many requests. Please wait a moment and try again."}), 429
+
         data = request.get_json(force=True)
-        name = data.get("name", "").strip()
+        name = _strip_html(data.get("name", "")).strip()
         rating = data.get("rating")
-        text = data.get("text", "").strip()
+        text = _strip_html(data.get("text", "")).strip()
         if not name or not text or not isinstance(rating, int) or not 1 <= rating <= 5:
             return jsonify({"error": "Name, 1-5 stars and a review are required."}), 400
         review_id = db.add_review({"name": name[:40], "rating": rating, "text": text[:280]})
